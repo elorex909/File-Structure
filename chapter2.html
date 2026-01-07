@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 2: File Structures & Organization | File Organization Master</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --neon-blue: #0ff0fc;
+            --neon-pink: #ff00ff;
+            --neon-green: #00ff9d;
+            --neon-purple: #b967ff;
+            --neon-yellow: #ffeb3b;
+            --dark-bg: #0a0a0f;
+            --dark-surface: rgba(15, 15, 25, 0.85);
+            --text-light: #f0f0f0;
+            --text-dim: #b0b0c0;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(100, 0, 255, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 200, 0.05) 0%, transparent 20%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        header {
+            margin-bottom: 40px;
+            padding-top: 20px;
+            position: relative;
+        }
+
+        .back-nav {
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(15, 240, 252, 0.1);
+            color: var(--neon-blue);
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid rgba(15, 240, 252, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(15, 240, 252, 0.2);
+            box-shadow: 0 0 15px rgba(15, 240, 252, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .chapter-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .chapter-number {
+            font-size: 5rem;
+            font-weight: 800;
+            color: rgba(15, 240, 252, 0.2);
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .chapter-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(15, 240, 252, 0.3);
+        }
+
+        .chapter-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Glass Panel */
+        .glass-panel {
+            background: var(--dark-surface);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .glass-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba(15, 240, 252, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-title {
+            font-size: 1.8rem;
+            color: var(--neon-green);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid rgba(0, 255, 157, 0.2);
+            padding-bottom: 10px;
+        }
+
+        .panel-title i {
+            font-size: 1.5rem;
+        }
+
+        /* Content Sections */
+        .content-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--neon-blue);
+            transition: all 0.3s ease;
+        }
+
+        .content-section:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: var(--neon-blue);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--neon-pink);
+        }
+
+        .section-content {
+            color: var(--text-dim);
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .key-points {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 10px 0 10px 30px;
+            color: var(--text-dim);
+            position: relative;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .key-points li:last-child {
+            border-bottom: none;
+        }
+
+        .key-points li:before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            color: var(--neon-green);
+            font-size: 0.8rem;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .comparison-table th {
+            background: rgba(15, 240, 252, 0.2);
+            color: var(--neon-blue);
+            padding: 15px;
+            text-align: left;
+            border-bottom: 2px solid rgba(15, 240, 252, 0.3);
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-dim);
+        }
+
+        .comparison-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Memory Hierarchy Visualization */
+        .memory-hierarchy {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        .memory-level {
+            width: 100%;
+            padding: 20px;
+            margin: 5px 0;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 5px solid var(--neon-blue);
+            transition: all 0.3s ease;
+        }
+
+        .memory-level:hover {
+            transform: translateX(10px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .memory-level.cpu {
+            border-left-color: var(--neon-green);
+            width: 30%;
+            align-self: flex-start;
+        }
+
+        .memory-level.ram {
+            border-left-color: var(--neon-pink);
+            width: 60%;
+            align-self: center;
+        }
+
+        .memory-level.storage {
+            border-left-color: var(--neon-purple);
+            width: 90%;
+            align-self: flex-end;
+        }
+
+        .memory-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--neon-blue);
+        }
+
+        .memory-desc {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        /* File Naming Rules */
+        .rules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .rule-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border-top: 3px solid var(--neon-pink);
+            transition: all 0.3s ease;
+        }
+
+        .rule-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .rule-title {
+            color: var(--neon-pink);
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* File Format Cards */
+        .format-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .format-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .format-card:hover {
+            border-color: var(--neon-green);
+            transform: translateY(-3px);
+        }
+
+        .format-type {
+            color: var(--neon-green);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        /* Exam Focus Box */
+        .exam-focus {
+            background: rgba(255, 235, 59, 0.1);
+            border: 1px solid rgba(255, 235, 59, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exam-focus:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 235, 59, 0.05), transparent);
+        }
+
+        .exam-title {
+            color: var(--neon-yellow);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .exam-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .exam-point {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--neon-yellow);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .btn-main {
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            color: white;
+            border: none;
+        }
+
+        .btn-download {
+            background: rgba(255, 0, 255, 0.1);
+            color: var(--neon-pink);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-main:hover {
+            background: linear-gradient(to right, var(--neon-pink), var(--neon-blue));
+        }
+
+        .btn-download:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .footer-highlight {
+            color: var(--neon-green);
+            font-weight: 600;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .chapter-number {
+                font-size: 4rem;
+            }
+            
+            .chapter-title {
+                font-size: 2rem;
+            }
+            
+            .glass-panel {
+                padding: 20px;
+            }
+            
+            .rules-grid,
+            .exam-points {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .format-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .chapter-number {
+                font-size: 3rem;
+            }
+            
+            .chapter-title {
+                font-size: 1.8rem;
+            }
+            
+            .panel-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Back Navigation -->
+        <header>
+            <div class="back-nav">
+                <a href="index.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Main Page
+                </a>
+            </div>
+            
+            <div class="chapter-header">
+                <div class="chapter-number">02</div>
+                <h1 class="chapter-title">File Structures & Organization</h1>
+                <p class="chapter-subtitle">Understanding File Structures, Data Processing, Computer Architecture, and File Management</p>
+            </div>
+        </header>
+
+        <main>
+            <!-- Chapter Overview -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-graduation-cap"></i> Chapter Overview</h2>
+                <div class="content-section">
+                    <p class="section-content">
+                        This chapter provides a comprehensive introduction to file structures, covering definitions, 
+                        operations, data processing concepts, computer architecture differences, and file management 
+                        fundamentals. It establishes the foundation for understanding how data is organized, stored, 
+                        and accessed in computer systems.
+                    </p>
+                </div>
+            </div>
+
+            <!-- File Structure Definition -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-sitemap"></i> File Structure Definition</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-cube"></i> What is a File Structure?</h3>
+                    <div class="section-content">
+                        <p>A <strong>File Structure</strong> is a combination of representations for data in files 
+                        and operations for accessing the data.</p>
+                        
+                        <div class="highlight" style="background: rgba(15, 240, 252, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 3px solid var(--neon-blue);">
+                            <strong>File Structure = Data Representation + Operations</strong>
+                            <p style="margin-top: 8px; color: var(--text-dim);">Without file structures, applications wouldn't know how to store, retrieve, or manage data efficiently.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-tasks"></i> File Structure Capabilities</h3>
+                    <div class="section-content">
+                        <p>File structures allow applications to perform the following operations:</p>
+                        <ul class="key-points">
+                            <li><strong>Read data</strong> – retrieve stored information</li>
+                            <li><strong>Write data</strong> – insert or add new information</li>
+                            <li><strong>Modify data</strong> – update or change existing records</li>
+                            <li><strong>Search data</strong> – find specific records based on criteria</li>
+                            <li><strong>Traverse data</strong> – read data in a particular order (e.g., sequentially)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-project-diagram"></i> File Structure Types</h3>
+                    <div class="section-content">
+                        <div class="rules-grid">
+                            <div class="rule-card">
+                                <div class="rule-title">Sequential File Structure</div>
+                                <p>Data stored one record after another (like a list). To find a record, you may need to scan from the beginning.</p>
+                                <p style="color: var(--neon-blue); margin-top: 8px; font-size: 0.9rem;">Example: Text file with students' names in order of entry</p>
+                            </div>
+                            
+                            <div class="rule-card">
+                                <div class="rule-title">Indexed File Structure</div>
+                                <p>An index (like a book's index) is created to quickly locate specific records.</p>
+                                <p style="color: var(--neon-green); margin-top: 8px; font-size: 0.9rem;">Example: Library system searching books by ISBN</p>
+                            </div>
+                            
+                            <div class="rule-card">
+                                <div class="rule-title">Hashed File Structure</div>
+                                <p>Data placed in a location based on a hash function.</p>
+                                <p style="color: var(--neon-pink); margin-top: 8px; font-size: 0.9rem;">Example: Storing employee records using employee ID hash</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Processing Concepts -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-cogs"></i> Data Processing Concepts</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-database"></i> Data Processing Components</h3>
+                    <div class="section-content">
+                        <p>From a computer science perspective, data processing involves three main aspects:</p>
+                        
+                        <div class="rules-grid">
+                            <div class="rule-card" style="border-top-color: var(--neon-blue);">
+                                <div class="rule-title" style="color: var(--neon-blue);">Storage of Data</div>
+                                <p>How data is saved on storage devices (RAM, hard disk, SSD, cloud)</p>
+                            </div>
+                            
+                            <div class="rule-card" style="border-top-color: var(--neon-green);">
+                                <div class="rule-title" style="color: var(--neon-green);">Organization of Data</div>
+                                <p>How data is structured (files, tables, databases, indexes)</p>
+                            </div>
+                            
+                            <div class="rule-card" style="border-top-color: var(--neon-pink);">
+                                <div class="rule-title" style="color: var(--neon-pink);">Access to Data</div>
+                                <p>How data is retrieved or modified efficiently (searching, updating, querying)</p>
+                            </div>
+                        </div>
+                        
+                        <div class="highlight" style="background: rgba(0, 255, 157, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 3px solid var(--neon-green);">
+                            <strong>Data Processing = Storage + Organization + Access</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Structures vs File Structures -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-balance-scale"></i> Data Structures vs File Structures</h2>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Aspect</th>
+                            <th>Data Structures</th>
+                            <th>File Structures</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Storage Location</strong></td>
+                            <td>Main Memory (RAM)</td>
+                            <td>Secondary Storage (Disk, SSD)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Speed</strong></td>
+                            <td>Fast (electronic access)</td>
+                            <td>Slow (mechanical/electronic)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Persistence</strong></td>
+                            <td>Temporary (lost when power off)</td>
+                            <td>Permanent (survives shutdown)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Size</strong></td>
+                            <td>Small (limited by RAM size)</td>
+                            <td>Large (limited by disk space)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cost</strong></td>
+                            <td>Expensive per GB</td>
+                            <td>Cheap per GB</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Examples</strong></td>
+                            <td>Arrays, Linked Lists, Trees</td>
+                            <td>Sequential Files, Indexed Files, B-Trees</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="content-section" style="margin-top: 20px;">
+                    <h3 class="section-title"><i class="fas fa-lightbulb"></i> Key Insight</h3>
+                    <div class="section-content">
+                        <p><strong>Both involve:</strong> Representation of Data + Operations for accessing data</p>
+                        <p><strong>Main difference:</strong> Data structures deal with data in main memory (fast, temporary), 
+                        while file structures deal with data in secondary storage (slow, permanent).</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Computer Architecture & Memory Hierarchy -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-microchip"></i> Computer Architecture & Memory Hierarchy</h2>
+                
+                <div class="memory-hierarchy">
+                    <div class="memory-level cpu">
+                        <div class="memory-title">CPU (Processor)</div>
+                        <div class="memory-desc">
+                            <p><strong>Registers:</strong> Very small storage inside CPU, extremely fast</p>
+                            <p><strong>Cache:</strong> Small but faster memory, stores frequently used data</p>
+                        </div>
+                    </div>
+                    
+                    <div class="memory-level ram">
+                        <div class="memory-title">Main Memory (RAM)</div>
+                        <div class="memory-desc">
+                            <p>Located between CPU and secondary storage</p>
+                            <p><strong>Properties:</strong> Fast, Small, Expensive, Volatile</p>
+                            <p>Holds data and programs while running</p>
+                        </div>
+                    </div>
+                    
+                    <div class="memory-level storage">
+                        <div class="memory-title">Secondary Storage (Disk, Tape, DVD-R, SSD)</div>
+                        <div class="memory-desc">
+                            <p>Used for permanent storage of data and programs</p>
+                            <p><strong>Properties:</strong> Slow, Large, Cheap, Stable (non-volatile)</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-tachometer-alt"></i> Speed Comparison Analogy</h3>
+                    <div class="section-content">
+                        <div class="highlight" style="background: rgba(255, 0, 255, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 3px solid var(--neon-pink);">
+                            <p><strong>Main memory access:</strong> ~120 nanoseconds</p>
+                            <p><strong>Magnetic disk access:</strong> ~30 milliseconds</p>
+                            <p style="margin-top: 10px;"><strong>Analogy:</strong> Looking at book index (20 seconds) vs Going to library (58 days)</p>
+                        </div>
+                        <p><strong>Scale:</strong> 1 second = 1000 milliseconds = 1,000,000 microseconds = 1,000,000,000 nanoseconds</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Management Fundamentals -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-folder"></i> File Management Fundamentals</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-file"></i> Computer File Definition</h3>
+                    <div class="section-content">
+                        <p>A <strong>computer file</strong> is a named collection of data that exists on a storage medium 
+                        (hard disk, CD, DVD, USB flash drive).</p>
+                        <p>Files can contain: group of records, documents, photos, music, videos, emails, or programs.</p>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-file-signature"></i> File Naming Rules</h3>
+                    <div class="section-content">
+                        <div class="rules-grid">
+                            <div class="rule-card">
+                                <div class="rule-title">Microsoft Windows</div>
+                                <ul style="padding-left: 20px; color: var(--text-dim);">
+                                    <li><strong>Case sensitive:</strong> No</li>
+                                    <li><strong>Max length:</strong> 255 characters (including path)</li>
+                                    <li><strong>Spaces allowed:</strong> Yes</li>
+                                    <li><strong>Disallowed characters:</strong> * \ : < > | " / ?</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="rule-card">
+                                <div class="rule-title">Mac OS</div>
+                                <ul style="padding-left: 20px; color: var(--text-dim);">
+                                    <li><strong>Case sensitive:</strong> No</li>
+                                    <li><strong>Max length:</strong> 255 characters</li>
+                                    <li><strong>Spaces allowed:</strong> Yes</li>
+                                    <li><strong>Disallowed character:</strong> : (colon)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-file-alt"></i> File Extensions & Formats</h3>
+                    <div class="section-content">
+                        <p><strong>File extension:</strong> Optional identifier separated by period (e.g., Paint.exe)</p>
+                        <p>Extensions provide clues to file contents (e.g., .exe = executable program)</p>
+                        
+                        <h4 style="color: var(--neon-green); margin: 15px 0 10px 0;">Common File Formats:</h4>
+                        <div class="format-cards">
+                            <div class="format-card">
+                                <div class="format-type">Text Documents</div>
+                                <div style="font-size: 0.9rem; color: var(--text-dim);">.txt, .docx, .pdf, .rtf</div>
+                            </div>
+                            
+                            <div class="format-card">
+                                <div class="format-type">Spreadsheets</div>
+                                <div style="font-size: 0.9rem; color: var(--text-dim);">.xlsx, .xls, .ods</div>
+                            </div>
+                            
+                            <div class="format-card">
+                                <div class="format-type">Graphics</div>
+                                <div style="font-size: 0.9rem; color: var(--text-dim);">.bmp, .jpg, .png, .gif</div>
+                            </div>
+                            
+                            <div class="format-card">
+                                <div class="format-type">Audio/Video</div>
+                                <div style="font-size: 0.9rem; color: var(--text-dim);">.mp3, .wav, .mp4, .avi</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Course Main Goal -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-bullseye"></i> Main Goal of This Course</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-rocket"></i> Primary Objective</h3>
+                    <div class="section-content">
+                        <p><strong>Minimize number of trips to the disk</strong> to get desired information.</p>
+                        <p>Ideally get what we need in one disk access or as few disk accesses as possible.</p>
+                        
+                        <div class="highlight" style="background: rgba(15, 240, 252, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 3px solid var(--neon-blue);">
+                            <h4 style="color: var(--neon-blue); margin-bottom: 8px;">Strategy for Efficiency</h4>
+                            <p>Group related information so we're likely to get everything needed with only one trip to disk.</p>
+                            <p style="margin-top: 8px; font-size: 0.9rem;">Example: Name, address, phone number, account balance stored together</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-map-marker-alt"></i> Locality of Reference</h3>
+                    <div class="section-content">
+                        <p>To achieve efficient file access, we need good file structure design based on:</p>
+                        <ul class="key-points">
+                            <li><strong>Locality of Reference in Time:</strong> If data is accessed now, it's likely to be accessed again soon</li>
+                            <li><strong>Locality of Reference in Space:</strong> If one data item is accessed, nearby items are likely to be accessed soon</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exam Focus Section -->
+            <div class="exam-focus">
+                <h2 class="exam-title"><i class="fas fa-star"></i> Exam Focus Points</h2>
+                <div class="exam-points">
+                    <div class="exam-point">
+                        <h4>File Structure Definition</h4>
+                        <p>Know that file structure = data representation + operations</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Data vs File Structures</h4>
+                        <p>Understand key differences in storage, speed, persistence</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Memory Hierarchy</h4>
+                        <p>CPU → Cache → RAM → Disk speed differences</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Data Processing Components</h4>
+                        <p>Storage + Organization + Access = Data Processing</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>File Naming Rules</h4>
+                        <p>Know OS-specific naming conventions and restrictions</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Course Objective</h4>
+                        <p>Minimize disk accesses through good file structure design</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Locality of Reference</h4>
+                        <p>Time and space locality principles for efficient access</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>File Operations</h4>
+                        <p>Read, write, modify, search, traverse capabilities</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Takeaways -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-lightbulb"></i> Key Takeaways</h2>
+                <div class="content-section">
+                    <ul class="key-points">
+                        <li>File structures combine data representation with operations for efficient data access</li>
+                        <li>Data structures work with temporary data in RAM, while file structures handle permanent data on disk</li>
+                        <li>The memory hierarchy shows significant speed differences between CPU, RAM, and disk storage</li>
+                        <li>Data processing involves storage, organization, and access of data</li>
+                        <li>File naming conventions vary by operating system with specific character restrictions</li>
+                        <li>The main course goal is to minimize disk accesses through efficient file organization</li>
+                        <li>Locality of reference (time and space) is crucial for designing efficient file structures</li>
+                        <li>Different file structures (sequential, indexed, hashed) serve different access pattern needs</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="index.html" class="action-btn btn-main">
+                    <i class="fas fa-home"></i> Back to Main Page
+                </a>
+                <a href="File organization the second lecture (2).pdf" class="action-btn btn-download" download>
+                    <i class="fas fa-download"></i> Download Chapter PDF
+                </a>
+            </div>
+        </main>
+
+        <footer>
+            <p>Chapter 2 Summary &copy; 2023 | Created by <span class="footer-highlight">Debuggers' Den Team</span></p>
+            <p style="margin-top: 10px;">This summary covers <span class="footer-highlight">all key points</span> from Chapter 2 for comprehensive exam preparation</p>
+        </footer>
+    </div>
+
+    <script>
+        // Add hover effects to content sections
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(5px)';
+            });
+            
+            section.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+
+        // Add animation to memory hierarchy levels
+        document.querySelectorAll('.memory-level').forEach(level => {
+            level.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(10px)';
+            });
+            
+            level.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+
+        // Add animation to rule cards
+        document.querySelectorAll('.rule-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Add click animation to action buttons
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+                
+                // If download button, show loading state
+                if (this.classList.contains('btn-download')) {
+                    const icon = this.querySelector('i');
+                    const originalClass = icon.className;
+                    icon.className = 'fas fa-spinner fa-spin';
+                    
+                    setTimeout(() => {
+                        icon.className = originalClass;
+                    }, 1000);
+                }
+            });
+        });
+
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate sections on load
+            const sections = document.querySelectorAll('.content-section, .glass-panel');
+            sections.forEach((section, index) => {
+                section.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+</body>
+</html>

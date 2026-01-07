@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 9: Lossy Compression | File Organization Master</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --neon-blue: #0ff0fc;
+            --neon-pink: #ff00ff;
+            --neon-green: #00ff9d;
+            --neon-purple: #b967ff;
+            --neon-yellow: #ffeb3b;
+            --dark-bg: #0a0a0f;
+            --dark-surface: rgba(15, 15, 25, 0.85);
+            --text-light: #f0f0f0;
+            --text-dim: #b0b0c0;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(100, 0, 255, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 200, 0.05) 0%, transparent 20%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        header {
+            margin-bottom: 40px;
+            padding-top: 20px;
+            position: relative;
+        }
+
+        .back-nav {
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(15, 240, 252, 0.1);
+            color: var(--neon-blue);
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid rgba(15, 240, 252, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(15, 240, 252, 0.2);
+            box-shadow: 0 0 15px rgba(15, 240, 252, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .chapter-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .chapter-number {
+            font-size: 5rem;
+            font-weight: 800;
+            color: rgba(15, 240, 252, 0.2);
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .chapter-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(15, 240, 252, 0.3);
+        }
+
+        .chapter-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Glass Panel */
+        .glass-panel {
+            background: var(--dark-surface);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .glass-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba(15, 240, 252, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-title {
+            font-size: 1.8rem;
+            color: var(--neon-green);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid rgba(0, 255, 157, 0.2);
+            padding-bottom: 10px;
+        }
+
+        .panel-title i {
+            font-size: 1.5rem;
+        }
+
+        /* Content Sections */
+        .content-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--neon-blue);
+            transition: all 0.3s ease;
+        }
+
+        .content-section:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: var(--neon-blue);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--neon-pink);
+        }
+
+        .section-content {
+            color: var(--text-dim);
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .key-points {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 10px 0 10px 30px;
+            color: var(--text-dim);
+            position: relative;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .key-points li:last-child {
+            border-bottom: none;
+        }
+
+        .key-points li:before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            color: var(--neon-green);
+            font-size: 0.8rem;
+        }
+
+        /* Compression Comparison */
+        .compression-demo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+        }
+
+        .file-size {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            min-width: 150px;
+        }
+
+        .uncompressed {
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid var(--neon-pink);
+        }
+
+        .compressed {
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid var(--neon-green);
+        }
+
+        .file-size-label {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            margin-bottom: 5px;
+        }
+
+        .file-size-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .uncompressed .file-size-value {
+            color: var(--neon-pink);
+        }
+
+        .compressed .file-size-value {
+            color: var(--neon-green);
+        }
+
+        .compression-arrow {
+            color: var(--neon-blue);
+            font-size: 2rem;
+            margin: 0 20px;
+        }
+
+        /* Methods Grid */
+        .methods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .method-card {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-top: 3px solid;
+            transition: all 0.3s ease;
+        }
+
+        .method-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .method-card.jpeg {
+            border-top-color: var(--neon-blue);
+        }
+
+        .method-card.mpeg {
+            border-top-color: var(--neon-green);
+        }
+
+        .method-card.audio {
+            border-top-color: var(--neon-pink);
+        }
+
+        .method-title {
+            color: var(--neon-blue);
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .method-card.jpeg .method-title {
+            color: var(--neon-blue);
+        }
+
+        .method-card.mpeg .method-title {
+            color: var(--neon-green);
+        }
+
+        .method-card.audio .method-title {
+            color: var(--neon-pink);
+        }
+
+        /* JPEG Process Steps */
+        .jpeg-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid;
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background: var(--neon-blue);
+            color: var(--dark-bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .step.lossy {
+            border-left-color: #ff3232;
+        }
+
+        .step.lossy .step-number {
+            background: #ff3232;
+        }
+
+        .step.lossless {
+            border-left-color: var(--neon-green);
+        }
+
+        .step.lossless .step-number {
+            background: var(--neon-green);
+        }
+
+        /* DCT Formula */
+        .formula-container {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid var(--neon-purple);
+            overflow-x: auto;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            color: var(--neon-yellow);
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        /* Quantization Table */
+        .quant-table {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 0, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .quant-cell {
+            padding: 12px;
+            text-align: center;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .quant-cell.header {
+            background: rgba(15, 240, 252, 0.2);
+            font-weight: 600;
+            color: var(--neon-blue);
+        }
+
+        .quant-cell.zero {
+            background: rgba(255, 50, 50, 0.2);
+            color: #ff3232;
+        }
+
+        /* MPEG Frame Comparison */
+        .frame-comparison {
+            display: flex;
+            justify-content: space-between;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .frame {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            width: 45%;
+        }
+
+        .frame-1 {
+            background: rgba(15, 240, 252, 0.1);
+            border: 1px solid var(--neon-blue);
+        }
+
+        .frame-2 {
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid var(--neon-green);
+        }
+
+        .frame-label {
+            color: var(--neon-blue);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .frame-2 .frame-label {
+            color: var(--neon-green);
+        }
+
+        /* Audio Encoding */
+        .audio-types {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .audio-card {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .audio-card.predictive {
+            border-top: 3px solid var(--neon-blue);
+        }
+
+        .audio-card.perceptual {
+            border-top: 3px solid var(--neon-pink);
+        }
+
+        .audio-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .audio-card.predictive .audio-title {
+            color: var(--neon-blue);
+        }
+
+        .audio-card.perceptual .audio-title {
+            color: var(--neon-pink);
+        }
+
+        /* Exam Focus Box */
+        .exam-focus {
+            background: rgba(255, 235, 59, 0.1);
+            border: 1px solid rgba(255, 235, 59, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exam-focus:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 235, 59, 0.05), transparent);
+        }
+
+        .exam-title {
+            color: var(--neon-yellow);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .exam-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .exam-point {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--neon-yellow);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .btn-main {
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            color: white;
+            border: none;
+        }
+
+        .btn-download {
+            background: rgba(255, 0, 255, 0.1);
+            color: var(--neon-pink);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-main:hover {
+            background: linear-gradient(to right, var(--neon-pink), var(--neon-blue));
+        }
+
+        .btn-download:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .footer-highlight {
+            color: var(--neon-green);
+            font-weight: 600;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes compress {
+            0% { width: 100%; }
+            100% { width: 40%; }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .methods-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .audio-types {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .chapter-number {
+                font-size: 4rem;
+            }
+            
+            .chapter-title {
+                font-size: 2rem;
+            }
+            
+            .glass-panel {
+                padding: 20px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .exam-points {
+                grid-template-columns: 1fr;
+            }
+            
+            .compression-demo {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .frame-comparison {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .frame {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .chapter-number {
+                font-size: 3rem;
+            }
+            
+            .chapter-title {
+                font-size: 1.8rem;
+            }
+            
+            .panel-title {
+                font-size: 1.5rem;
+            }
+            
+            .formula-container {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Back Navigation -->
+        <header>
+            <div class="back-nav">
+                <a href="index.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Main Page
+                </a>
+            </div>
+            
+            <div class="chapter-header">
+                <div class="chapter-number">09</div>
+                <h1 class="chapter-title">Lossy Compression Methods</h1>
+                <p class="chapter-subtitle">JPEG Image Compression, MPEG Video Compression, and Audio Encoding Techniques</p>
+            </div>
+        </header>
+
+        <main>
+            <!-- Chapter Overview -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-graduation-cap"></i> Chapter Overview</h2>
+                <div class="content-section">
+                    <p class="section-content">
+                        This chapter explores lossy compression methods that permanently remove some data to achieve 
+                        significant size reduction. Unlike lossless methods, lossy compression sacrifices perfect 
+                        accuracy for practical benefits in images, video, and audio files where humans cannot easily 
+                        detect the missing information.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Lossy vs Lossless -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-balance-scale"></i> Lossy vs. Lossless Compression</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-exclamation-triangle"></i> What is Lossy Compression?</h3>
+                    <div class="section-content">
+                        <ul class="key-points">
+                            <li><strong>Permanently removes data</strong> to reduce file size</li>
+                            <li>Removes data humans <strong>cannot easily detect</strong> (subtle visual/audio details)</li>
+                            <li><strong>Original ≠ Decompressed</strong> (some information is lost forever)</li>
+                            <li>Used for: Images, video, audio files</li>
+                            <li>Examples: JPEG, MPEG, MP3</li>
+                        </ul>
+                        
+                        <div class="compression-demo">
+                            <div class="file-size uncompressed">
+                                <div class="file-size-label">Uncompressed Image</div>
+                                <div class="file-size-value">57.5 KB</div>
+                            </div>
+                            
+                            <div class="compression-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                            
+                            <div class="file-size compressed">
+                                <div class="file-size-label">JPEG Compressed</div>
+                                <div class="file-size-value">5.93 KB</div>
+                            </div>
+                        </div>
+                        
+                        <p style="text-align: center; color: var(--neon-green); font-weight: 600;">
+                            <i class="fas fa-chart-line"></i> 89.7% Size Reduction!
+                        </p>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-check-circle"></i> Why Accept Data Loss?</h3>
+                    <div class="section-content">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                            <div style="padding: 15px; background: rgba(15, 240, 252, 0.1); border-radius: 8px;">
+                                <p style="color: var(--neon-blue); font-weight: 600; margin-bottom: 10px;">
+                                    <i class="fas fa-eye"></i> Human Vision Limits
+                                </p>
+                                <p style="color: var(--text-dim); font-size: 0.9rem;">
+                                    Eyes can't detect subtle color changes or fine details at certain resolutions
+                                </p>
+                            </div>
+                            
+                            <div style="padding: 15px; background: rgba(255, 0, 255, 0.1); border-radius: 8px;">
+                                <p style="color: var(--neon-pink); font-weight: 600; margin-bottom: 10px;">
+                                    <i class="fas fa-ear"></i> Human Hearing Limits
+                                </p>
+                                <p style="color: var(--text-dim); font-size: 0.9rem;">
+                                    Ears can't hear very high frequencies or quiet sounds masked by louder ones
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <ul class="key-points">
+                            <li><strong>Cheaper storage</strong> - smaller files need less space</li>
+                            <li><strong>Faster transmission</strong> - smaller files transfer quicker</li>
+                            <li><strong>Less processing time</strong> - smaller files are faster to handle</li>
+                            <li><strong>Acceptable quality</strong> - loss is imperceptible to humans</li>
+                            <li><strong>Practical for media</strong> - essential for web images, streaming video, digital music</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compression Methods Overview -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-th-large"></i> Lossy Compression Methods</h2>
+                
+                <div class="methods-grid">
+                    <div class="method-card jpeg">
+                        <div class="method-title">
+                            <i class="fas fa-image"></i> JPEG
+                        </div>
+                        <div style="color: var(--text-dim);">
+                            <p><strong>Joint Photographic Experts Group</strong></p>
+                            <ul style="padding-left: 20px; margin-top: 10px;">
+                                <li>Compresses <strong>pictures and graphics</strong></li>
+                                <li>Divides image into 8×8 pixel blocks</li>
+                                <li>Uses DCT transform + quantization</li>
+                                <li>Removes high-frequency details</li>
+                                <li>File extensions: .jpg, .jpeg</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="method-card mpeg">
+                        <div class="method-title">
+                            <i class="fas fa-video"></i> MPEG
+                        </div>
+                        <div style="color: var(--text-dim);">
+                            <p><strong>Moving Picture Experts Group</strong></p>
+                            <ul style="padding-left: 20px; margin-top: 10px;">
+                                <li>Compresses <strong>video files</strong></li>
+                                <li>Video = sequence of images (frames)</li>
+                                <li>Spatial + temporal compression</li>
+                                <li>Stores differences between frames</li>
+                                <li>File extensions: .mpg, .mpeg, .mp4</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="method-card audio">
+                        <div class="method-title">
+                            <i class="fas fa-music"></i> MP3/Audio
+                        </div>
+                        <div style="color: var(--text-dim);">
+                            <p><strong>Audio Compression</strong></p>
+                            <ul style="padding-left: 20px; margin-top: 10px;">
+                                <li><strong>MP3</strong>: MPEG Audio Layer 3</li>
+                                <li>Speech: 64 kHz → compressed</li>
+                                <li>Music: 1.411 MHz → compressed</li>
+                                <li>Uses psychoacoustic model</li>
+                                <li>File extensions: .mp3, .aac</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- JPEG Encoding -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-cogs"></i> JPEG Encoding Process</h2>
+                
+                <div class="jpeg-steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div>
+                            <p style="color: var(--neon-blue); font-weight: 600;">Divide into 8×8 Blocks</p>
+                            <p style="color: var(--text-dim); font-size: 0.9rem;">
+                                Grayscale image divided into 8×8 pixel blocks to reduce calculations
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div>
+                            <p style="color: var(--neon-blue); font-weight: 600;">Apply DCT (Discrete Cosine Transform)</p>
+                            <p style="color: var(--text-dim); font-size: 0.9rem;">
+                                Converts spatial pixel values into frequency domain
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="step lossy">
+                        <div class="step-number">3</div>
+                        <div>
+                            <p style="color: #ff3232; font-weight: 600;">Quantization (LOSSY STEP)</p>
+                            <p style="color: var(--text-dim); font-size: 0.9rem;">
+                                Divide DCT values by quantization table, drop decimals
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div>
+                            <p style="color: var(--neon-blue); font-weight: 600;">Zigzag Scan</p>
+                            <p style="color: var(--text-dim); font-size: 0.9rem;">
+                                Read 8×8 block diagonally to group zeros together
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="step lossless">
+                        <div class="step-number">5</div>
+                        <div>
+                            <p style="color: var(--neon-green); font-weight: 600;">Lossless Compression</p>
+                            <p style="color: var(--text-dim); font-size: 0.9rem;">
+                                Apply RLE then Huffman coding to compress remaining data
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-superscript"></i> DCT (Discrete Cosine Transform)</h3>
+                    <div class="section-content">
+                        <p>DCT converts 64 pixel values (spatial domain) into frequency values:</p>
+                        
+                        <div class="formula-container">
+                            <p style="color: var(--neon-purple); font-weight: 600; margin-bottom: 10px;">2-D DCT Formula (JPEG uses N=8):</p>
+                            <div class="formula">
+                                X<sub>u,v</sub> = α(u)α(v) ∑<sub>x=0</sub><sup>N-1</sup> ∑<sub>y=0</sub><sup>N-1</sup> f(x,y) cos[π(2x+1)u/(2N)] cos[π(2y+1)v/(2N)]
+                            </div>
+                            <p style="color: var(--text-dim); margin-top: 10px; font-size: 0.9rem;">
+                                Where α(k) = 1/√N for k=0, α(k) = 2/√N for k>0
+                            </p>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
+                            <div style="padding: 15px; background: rgba(0, 255, 157, 0.1); border-radius: 8px;">
+                                <p style="color: var(--neon-green); font-weight: 600;">Low Frequencies</p>
+                                <p style="color: var(--text-dim); font-size: 0.9rem;">
+                                    Represent smooth areas, gradual color changes
+                                </p>
+                            </div>
+                            
+                            <div style="padding: 15px; background: rgba(255, 0, 255, 0.1); border-radius: 8px;">
+                                <p style="color: var(--neon-pink); font-weight: 600;">High Frequencies</p>
+                                <p style="color: var(--text-dim); font-size: 0.9rem;">
+                                    Represent fine details, edges, noise
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <p><strong>Goal:</strong> Keep important low-frequency values, reduce unimportant high-frequency values</p>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-divide"></i> Quantization Example</h3>
+                    <div class="section-content">
+                        <p>Each DCT value divided by quantization table value, decimals dropped:</p>
+                        
+                        <div class="quant-table">
+                            <div class="quant-cell header">DCT Value</div>
+                            <div class="quant-cell header">Divide By</div>
+                            <div class="quant-cell header">Result</div>
+                            
+                            <div class="quant-cell">400</div>
+                            <div class="quant-cell">10</div>
+                            <div class="quant-cell">40</div>
+                            
+                            <div class="quant-cell">5</div>
+                            <div class="quant-cell">3</div>
+                            <div class="quant-cell">1</div>
+                            
+                            <div class="quant-cell">2</div>
+                            <div class="quant-cell">3</div>
+                            <div class="quant-cell zero">0</div>
+                        </div>
+                        
+                        <p style="margin-top: 15px; color: var(--neon-green);">
+                            <i class="fas fa-lightbulb"></i> Most high-frequency values become <strong>0</strong>, which compresses well with RLE
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MPEG Encoding -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-film"></i> MPEG Video Compression</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-layer-group"></i> Video = Sequence of Frames</h3>
+                    <div class="section-content">
+                        <p>Video is simply a <strong>rapid sequence of images</strong> (frames).</p>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                            <div style="padding: 20px; background: rgba(15, 240, 252, 0.1); border-radius: 8px; text-align: center;">
+                                <p style="color: var(--neon-blue); font-weight: 600; margin-bottom: 10px;">
+                                    Spatial Compression
+                                </p>
+                                <p style="color: var(--text-dim);">
+                                    <strong>Inside each frame</strong><br>
+                                    Each frame compressed like JPEG image
+                                </p>
+                            </div>
+                            
+                            <div style="padding: 20px; background: rgba(255, 0, 255, 0.1); border-radius: 8px; text-align: center;">
+                                <p style="color: var(--neon-pink); font-weight: 600; margin-bottom: 10px;">
+                                    Temporal Compression
+                                </p>
+                                <p style="color: var(--text-dim);">
+                                    <strong>Between frames</strong><br>
+                                    MAJOR SAVINGS - only store differences
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-exchange-alt"></i> Temporal Compression Concept</h3>
+                    <div class="section-content">
+                        <p><strong>Key Insight:</strong> Most frames are very similar to each other.</p>
+                        
+                        <div class="frame-comparison">
+                            <div class="frame frame-1">
+                                <div class="frame-label">Frame 1</div>
+                                <div style="padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 6px; margin: 10px 0;">
+                                    <p style="color: var(--text-dim);">
+                                        Person sitting<br>
+                                        Mouth closed<br>
+                                        Background static
+                                    </p>
+                                </div>
+                                <p style="color: var(--neon-blue); font-size: 0.9rem;">
+                                    <i class="fas fa-save"></i> Store complete frame
+                                </p>
+                            </div>
+                            
+                            <div class="frame frame-2">
+                                <div class="frame-label">Frame 2 (0.04s later)</div>
+                                <div style="padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 6px; margin: 10px 0;">
+                                    <p style="color: var(--text-dim);">
+                                        Person sitting<br>
+                                        <span style="color: var(--neon-green); font-weight: 600;">Mouth slightly open</span><br>
+                                        Background static
+                                    </p>
+                                </div>
+                                <p style="color: var(--neon-green); font-size: 0.9rem;">
+                                    <i class="fas fa-compress-alt"></i> Store ONLY mouth region difference
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <p style="text-align: center; color: var(--text-dim); margin-top: 15px;">
+                            Instead of storing 100% of Frame 2, MPEG stores only the <strong>changed pixels</strong> (≈5-10% of frame).
+                        </p>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-chart-bar"></i> MPEG Compression Savings</h3>
+                    <div class="section-content">
+                        <ul class="key-points">
+                            <li><strong>Spatial compression</strong> alone: 10:1 ratio (JPEG on each frame)</li>
+                            <li><strong>Temporal compression</strong> adds: 30:1 to 50:1 additional ratio</li>
+                            <li><strong>Total compression</strong>: 300:1 to 500:1 possible</li>
+                            <li>Example: Uncompressed HD video: ~1 Gbps → MPEG-4: 2-8 Mbps</li>
+                            <li>Enables video streaming, digital TV, DVD/Blu-ray storage</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audio Compression -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-volume-up"></i> Audio Compression</h2>
+                
+                <div class="audio-types">
+                    <div class="audio-card predictive">
+                        <div class="audio-title">Predictive Encoding</div>
+                        <div style="color: var(--text-dim); margin: 15px 0;">
+                            <p><strong>Used for: Speech</strong></p>
+                            <p>Stores only <strong>differences between samples</strong></p>
+                            <div style="margin: 15px 0; padding: 10px; background: rgba(0, 0, 0, 0.3); border-radius: 6px;">
+                                <p style="font-family: monospace; color: var(--neon-blue);">
+                                    Samples: 100, 101, 102, 103, 103, 104<br>
+                                    Differences: +1, +1, +1, 0, +1
+                                </p>
+                            </div>
+                        </div>
+                        <div style="color: var(--neon-blue); font-weight: 600;">
+                            Standards: GSM (13 kbps), G.729 (8 kbps), G.723.3 (6.4 kbps)
+                        </div>
+                    </div>
+                    
+                    <div class="audio-card perceptual">
+                        <div class="audio-title">Perceptual Encoding (MP3)</div>
+                        <div style="color: var(--text-dim); margin: 15px 0;">
+                            <p><strong>Used for: Music</strong></p>
+                            <p>Removes sounds humans <strong>cannot hear</strong>:</p>
+                            <ul style="padding-left: 20px; margin-top: 10px;">
+                                <li>Very high frequencies</li>
+                                <li>Quiet sounds masked by louder ones</li>
+                                <li>Uses psychoacoustic model</li>
+                            </ul>
+                        </div>
+                        <div style="color: var(--neon-pink); font-weight: 600;">
+                            CD Audio: 1,411 kbps → MP3: 128 kbps (11:1 compression)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-compress-arrows-alt"></i> Audio Compression Ratios</h3>
+                    <div class="section-content">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
+                            <div style="padding: 15px; background: rgba(255, 0, 255, 0.1); border-radius: 8px; text-align: center;">
+                                <p style="color: var(--neon-pink); font-weight: 600; font-size: 0.9rem;">CD Audio</p>
+                                <p style="color: var(--text-dim); font-size: 1.2rem; font-weight: 600;">1,411 kbps</p>
+                                <p style="color: var(--text-dim); font-size: 0.8rem;">Uncompressed</p>
+                            </div>
+                            
+                            <div style="padding: 15px; background: rgba(0, 255, 157, 0.1); border-radius: 8px; text-align: center;">
+                                <p style="color: var(--neon-green); font-weight: 600; font-size: 0.9rem;">MP3 High Quality</p>
+                                <p style="color: var(--text-dim); font-size: 1.2rem; font-weight: 600;">320 kbps</p>
+                                <p style="color: var(--text-dim); font-size: 0.8rem;">4.4:1 ratio</p>
+                            </div>
+                            
+                            <div style="padding: 15px; background: rgba(15, 240, 252, 0.1); border-radius: 8px; text-align: center;">
+                                <p style="color: var(--neon-blue); font-weight: 600; font-size: 0.9rem;">MP3 Standard</p>
+                                <p style="color: var(--text-dim); font-size: 1.2rem; font-weight: 600;">128 kbps</p>
+                                <p style="color: var(--text-dim); font-size: 0.8rem;">11:1 ratio</p>
+                            </div>
+                            
+                            <div style="padding: 15px; background: rgba(255, 235, 59, 0.1); border-radius: 8px; text-align: center;">
+                                <p style="color: var(--neon-yellow); font-weight: 600; font-size: 0.9rem;">Speech (GSM)</p>
+                                <p style="color: var(--text-dim); font-size: 1.2rem; font-weight: 600;">13 kbps</p>
+                                <p style="color: var(--text-dim); font-size: 0.8rem;">108:1 ratio</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Method Comparison -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-columns"></i> Lossy Compression Comparison</h2>
+                
+                <div class="content-section">
+                    <div class="section-content">
+                        <table style="width: 100%; border-collapse: collapse; margin: 20px 0; background: rgba(0, 0, 0, 0.2); border-radius: 8px; overflow: hidden;">
+                            <thead>
+                                <tr style="background: rgba(15, 240, 252, 0.2);">
+                                    <th style="padding: 12px; text-align: left; color: var(--neon-blue);">Method</th>
+                                    <th style="padding: 12px; text-align: left; color: var(--neon-blue);">Application</th>
+                                    <th style="padding: 12px; text-align: left; color: var(--neon-blue);">Key Technique</th>
+                                    <th style="padding: 12px; text-align: left; color: var(--neon-blue);">Compression Ratio</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <td style="padding: 12px; color: var(--text-dim);"><strong>JPEG</strong></td>
+                                    <td style="padding: 12px; color: var(--text-dim);">Images, photos</td>
+                                    <td style="padding: 12px; color: var(--text-dim);">DCT + quantization</td>
+                                    <td style="padding: 12px; color: var(--text-dim);">10:1 to 20:1</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <td style="padding: 12px; color: var(--text-dim);"><strong>MPEG</strong></td>
+                                    <td style="padding: 12px; color: var(--text-dim);">Video</td>
+                                    <td style="padding: 12px; color: var(--text-dim);">Spatial + temporal</td>
+                                    <td style="padding: 12px; color: var(--text-dim);">50:1 to 200:1</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <td style="padding: 12px; color: var(--text-dim);"><strong>MP3</strong></td>
+                                    <td style="padding: 12px; color: var(--text-dim);">Music</td>
+                                    <td style="padding: 12px; color: var(--text-dim);">Perceptual encoding</td>
+                                    <td style="padding: 12px; color: var(--text-dim);">10:1 to 12:1</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px; color: var(--text-dim);"><strong>Speech Codecs</strong></td>
+                                    <td style="padding: 12px; color: var(--text-dim);">Voice calls</td>
+                                    <td style="padding: 12px; color: var(--text-dim);">Predictive encoding</td>
+                                    <td style="padding: 12px; color: var(--text-dim);">100:1 to 200:1</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exam Focus Section -->
+            <div class="exam-focus">
+                <h2 class="exam-title"><i class="fas fa-star"></i> Exam Focus Points</h2>
+                <div class="exam-points">
+                    <div class="exam-point">
+                        <h4>Lossy vs Lossless</h4>
+                        <p>Differences, when to use each, human perception limits</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>JPEG Steps</h4>
+                        <p>8×8 blocks, DCT, quantization (lossy step), zigzag, RLE+Huffman</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>DCT Purpose</h4>
+                        <p>Converts spatial→frequency, low vs high frequencies</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>MPEG Compression</h4>
+                        <p>Spatial vs temporal, frame difference storage</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Audio Methods</h4>
+                        <p>Predictive (speech) vs perceptual (MP3 music)</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Quantization</h4>
+                        <p>How it works, why it's the lossy step in JPEG</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Compression Ratios</h4>
+                        <p>Typical ratios for JPEG, MPEG, MP3</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Real-world Applications</h4>
+                        <p>File formats, streaming, digital media storage</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Takeaways -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-lightbulb"></i> Key Takeaways</h2>
+                <div class="content-section">
+                    <ul class="key-points">
+                        <li><strong>Lossy compression</strong> permanently removes data humans can't easily detect</li>
+                        <li><strong>JPEG</strong> uses 8×8 blocks, DCT transform, quantization (lossy step), then lossless compression</li>
+                        <li><strong>DCT</strong> converts spatial pixels to frequency: low frequencies = smooth areas, high frequencies = details</li>
+                        <li><strong>Quantization</strong> divides values and drops decimals → creates many zeros for compression</li>
+                        <li><strong>MPEG</strong> compresses video with spatial (JPEG per frame) + temporal (store differences) compression</li>
+                        <li><strong>Audio compression</strong>: Predictive for speech (store differences), Perceptual (MP3) for music (remove inaudible sounds)</li>
+                        <li>Typical ratios: JPEG 10-20:1, MPEG 50-200:1, MP3 10-12:1, Speech codecs 100-200:1</li>
+                        <li>Lossy enables practical media storage/streaming: web images, YouTube, Spotify, digital TV</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="index.html" class="action-btn btn-main">
+                    <i class="fas fa-home"></i> Back to Main Page
+                </a>
+                <a href="File organization the ninth lecture (9).pdf" class="action-btn btn-download" download>
+                    <i class="fas fa-download"></i> Download Chapter PDF
+                </a>
+            </div>
+        </main>
+
+        <footer>
+            <p>Chapter 9 Summary &copy; 2023 | Created by <span class="footer-highlight">Debuggers' Den Team</span></p>
+            <p style="margin-top: 10px;">This summary covers <span class="footer-highlight">all key points</span> from Chapter 9 for comprehensive exam preparation</p>
+        </footer>
+    </div>
+
+    <script>
+        // Add hover effects to content sections
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(5px)';
+            });
+            
+            section.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+
+        // Add animation to compression demo
+        const compressionDemo = document.querySelector('.compression-demo');
+        if (compressionDemo) {
+            compressionDemo.addEventListener('mouseenter', function() {
+                const uncompressed = this.querySelector('.uncompressed');
+                const compressed = this.querySelector('.compressed');
+                const arrow = this.querySelector('.compression-arrow');
+                
+                uncompressed.style.animation = 'pulse 1s ease-in-out';
+                compressed.style.animation = 'pulse 1s ease-in-out 0.5s';
+                arrow.style.animation = 'pulse 1s ease-in-out 0.25s';
+                
+                setTimeout(() => {
+                    uncompressed.style.animation = '';
+                    compressed.style.animation = '';
+                    arrow.style.animation = '';
+                }, 1500);
+            });
+        }
+
+        // Add animation to method cards
+        document.querySelectorAll('.method-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.3)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = 'none';
+            });
+        });
+
+        // Add animation to steps
+        document.querySelectorAll('.step').forEach(step => {
+            step.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(5px)';
+            });
+            
+            step.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+
+        // Add animation to frame comparison
+        const frames = document.querySelectorAll('.frame');
+        frames.forEach(frame => {
+            frame.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.02)';
+            });
+            
+            frame.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+
+        // Add click animation to action buttons
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+                
+                // If download button, show loading state
+                if (this.classList.contains('btn-download')) {
+                    const icon = this.querySelector('i');
+                    const originalClass = icon.className;
+                    icon.className = 'fas fa-spinner fa-spin';
+                    
+                    setTimeout(() => {
+                        icon.className = originalClass;
+                    }, 1000);
+                }
+            });
+        });
+
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate sections on load
+            const sections = document.querySelectorAll('.content-section, .glass-panel');
+            sections.forEach((section, index) => {
+                section.style.animationDelay = `${index * 0.1}s`;
+            });
+            
+            // Pulse animation for quantization table
+            const zeroCells = document.querySelectorAll('.quant-cell.zero');
+            if (zeroCells.length > 0) {
+                setInterval(() => {
+                    zeroCells.forEach(cell => {
+                        cell.style.animation = 'pulse 1s ease-in-out';
+                        setTimeout(() => {
+                            cell.style.animation = '';
+                        }, 1000);
+                    });
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>

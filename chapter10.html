@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 10: Indexing | File Organization Master</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --neon-blue: #0ff0fc;
+            --neon-pink: #ff00ff;
+            --neon-green: #00ff9d;
+            --neon-purple: #b967ff;
+            --neon-yellow: #ffeb3b;
+            --dark-bg: #0a0a0f;
+            --dark-surface: rgba(15, 15, 25, 0.85);
+            --text-light: #f0f0f0;
+            --text-dim: #b0b0c0;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(100, 0, 255, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 200, 0.05) 0%, transparent 20%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        header {
+            margin-bottom: 40px;
+            padding-top: 20px;
+            position: relative;
+        }
+
+        .back-nav {
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(15, 240, 252, 0.1);
+            color: var(--neon-blue);
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid rgba(15, 240, 252, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(15, 240, 252, 0.2);
+            box-shadow: 0 0 15px rgba(15, 240, 252, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .chapter-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .chapter-number {
+            font-size: 5rem;
+            font-weight: 800;
+            color: rgba(15, 240, 252, 0.2);
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .chapter-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(15, 240, 252, 0.3);
+        }
+
+        .chapter-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Glass Panel */
+        .glass-panel {
+            background: var(--dark-surface);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .glass-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba(15, 240, 252, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-title {
+            font-size: 1.8rem;
+            color: var(--neon-green);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid rgba(0, 255, 157, 0.2);
+            padding-bottom: 10px;
+        }
+
+        .panel-title i {
+            font-size: 1.5rem;
+        }
+
+        /* Content Sections */
+        .content-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--neon-blue);
+            transition: all 0.3s ease;
+        }
+
+        .content-section:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: var(--neon-blue);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--neon-pink);
+        }
+
+        .section-content {
+            color: var(--text-dim);
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .key-points {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 10px 0 10px 30px;
+            color: var(--text-dim);
+            position: relative;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .key-points li:last-child {
+            border-bottom: none;
+        }
+
+        .key-points li:before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            color: var(--neon-green);
+            font-size: 0.8rem;
+        }
+
+        /* Search Visualization */
+        .search-viz {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+        }
+
+        .binary-search-viz {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .search-step {
+            display: flex;
+            width: 100%;
+            margin: 10px 0;
+            position: relative;
+            align-items: center;
+        }
+
+        .record-box {
+            flex: 1;
+            padding: 12px;
+            background: rgba(15, 240, 252, 0.1);
+            border: 1px solid rgba(15, 240, 252, 0.3);
+            border-radius: 6px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            min-height: 70px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .record-box.mid {
+            background: rgba(255, 0, 255, 0.2);
+            border-color: var(--neon-pink);
+            transform: scale(1.05);
+        }
+
+        .record-box.low {
+            background: rgba(255, 235, 59, 0.1);
+            border-color: var(--neon-yellow);
+        }
+
+        .record-box.high {
+            background: rgba(185, 103, 255, 0.1);
+            border-color: var(--neon-purple);
+        }
+
+        .record-box.found {
+            background: rgba(0, 255, 157, 0.2);
+            border-color: var(--neon-green);
+            transform: scale(1.05);
+            animation: pulse 1s;
+        }
+
+        .record-value {
+            color: var(--neon-blue);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .record-index {
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        .step-label {
+            min-width: 120px;
+            color: var(--neon-green);
+            font-weight: 600;
+            margin-right: 15px;
+        }
+
+        /* Comparison Grid */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .comparison-card {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-top: 3px solid;
+        }
+
+        .comparison-card.sequential {
+            border-top-color: var(--neon-pink);
+        }
+
+        .comparison-card.binary {
+            border-top-color: var(--neon-blue);
+        }
+
+        .comparison-title {
+            color: var(--neon-blue);
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .comparison-card.sequential .comparison-title {
+            color: var(--neon-pink);
+        }
+
+        .comparison-card.binary .comparison-title {
+            color: var(--neon-blue);
+        }
+
+        /* Key Sorting Visualization */
+        .key-sorting-viz {
+            display: flex;
+            width: 100%;
+            gap: 30px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+
+        .memory-viz, .disk-viz {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .memory-viz {
+            background: rgba(15, 240, 252, 0.1);
+            border: 1px solid var(--neon-blue);
+        }
+
+        .disk-viz {
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid var(--neon-pink);
+        }
+
+        .viz-title {
+            color: var(--neon-green);
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .viz-content {
+            font-family: monospace;
+            color: var(--text-dim);
+            line-height: 1.8;
+        }
+
+        /* Index Structure */
+        .index-structure {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .index-row {
+            display: flex;
+            padding: 15px;
+            background: rgba(15, 240, 252, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid var(--neon-blue);
+        }
+
+        .index-key {
+            flex: 1;
+            color: var(--neon-blue);
+            font-weight: 600;
+        }
+
+        .index-ref {
+            flex: 1;
+            color: var(--neon-pink);
+            font-weight: 600;
+        }
+
+        /* Multi-Key Visualization */
+        .multi-key-viz {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .key-index-card {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-top: 3px solid var(--neon-purple);
+        }
+
+        .key-index-title {
+            color: var(--neon-purple);
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        /* Performance Comparison */
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .perf-card {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .perf-card:hover {
+            border-color: var(--neon-yellow);
+            transform: translateY(-5px);
+        }
+
+        .perf-title {
+            color: var(--neon-yellow);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        /* Time Complexity */
+        .complexity-box {
+            display: flex;
+            justify-content: space-between;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .complexity-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .complexity-title {
+            color: var(--neon-purple);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        /* Operations Visualization */
+        .operations-viz {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .op-card {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            text-align: center;
+            border-top: 3px solid;
+        }
+
+        .op-card.add {
+            border-top-color: var(--neon-green);
+        }
+
+        .op-card.delete {
+            border-top-color: var(--neon-pink);
+        }
+
+        .op-card.update {
+            border-top-color: var(--neon-yellow);
+        }
+
+        .op-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .op-card.add .op-title {
+            color: var(--neon-green);
+        }
+
+        .op-card.delete .op-title {
+            color: var(--neon-pink);
+        }
+
+        .op-card.update .op-title {
+            color: var(--neon-yellow);
+        }
+
+        /* Exam Focus Box */
+        .exam-focus {
+            background: rgba(255, 235, 59, 0.1);
+            border: 1px solid rgba(255, 235, 59, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exam-focus:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 235, 59, 0.05), transparent);
+        }
+
+        .exam-title {
+            color: var(--neon-yellow);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .exam-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .exam-point {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--neon-yellow);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .btn-main {
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            color: white;
+            border: none;
+        }
+
+        .btn-download {
+            background: rgba(255, 0, 255, 0.1);
+            color: var(--neon-pink);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-main:hover {
+            background: linear-gradient(to right, var(--neon-pink), var(--neon-blue));
+        }
+
+        .btn-download:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .footer-highlight {
+            color: var(--neon-green);
+            font-weight: 600;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .chapter-number {
+                font-size: 4rem;
+            }
+            
+            .chapter-title {
+                font-size: 2rem;
+            }
+            
+            .glass-panel {
+                padding: 20px;
+            }
+            
+            .comparison-grid,
+            .multi-key-viz,
+            .exam-points {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .performance-grid,
+            .operations-viz {
+                grid-template-columns: 1fr;
+            }
+            
+            .complexity-box {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .key-sorting-viz {
+                flex-direction: column;
+            }
+            
+            .search-step {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .chapter-number {
+                font-size: 3rem;
+            }
+            
+            .chapter-title {
+                font-size: 1.8rem;
+            }
+            
+            .panel-title {
+                font-size: 1.5rem;
+            }
+            
+            .record-box {
+                padding: 8px;
+                min-height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Back Navigation -->
+        <header>
+            <div class="back-nav">
+                <a href="index.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Main Page
+                </a>
+            </div>
+            
+            <div class="chapter-header">
+                <div class="chapter-number">10</div>
+                <h1 class="chapter-title">Indexing</h1>
+                <p class="chapter-subtitle">Binary Search, Key Sorting, Index Structures, and Multi-Key Access</p>
+            </div>
+        </header>
+
+        <main>
+            <!-- Chapter Overview -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-graduation-cap"></i> Chapter Overview</h2>
+                <div class="content-section">
+                    <p class="section-content">
+                        This chapter covers advanced file organization techniques including binary searching, 
+                        key sorting for large files, index structures, and implementing multiple access paths 
+                        through secondary keys.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Binary Searching -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-search"></i> Binary Searching</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-sitemap"></i> What is Binary Search?</h3>
+                    <div class="section-content">
+                        <p>A technique for searching an ordered list in which we first check the middle item and - 
+                        based on that comparison - "discard" half the data. The same procedure is then applied to 
+                        the remaining half until a match is found or there are no more items left.</p>
+                        
+                        <div class="binary-search-viz">
+                            <div class="search-step">
+                                <span class="step-label">Searching for: 37</span>
+                                <div class="record-box low">1<br><span class="record-index">0</span></div>
+                                <div class="record-box">3<br><span class="record-index">1</span></div>
+                                <div class="record-box">5<br><span class="record-index">2</span></div>
+                                <div class="record-box">7<br><span class="record-index">3</span></div>
+                                <div class="record-box">11<br><span class="record-index">4</span></div>
+                                <div class="record-box">13<br><span class="record-index">5</span></div>
+                                <div class="record-box">17<br><span class="record-index">6</span></div>
+                                <div class="record-box mid">19<br><span class="record-index">7</span></div>
+                                <div class="record-box">23<br><span class="record-index">8</span></div>
+                                <div class="record-box">29<br><span class="record-index">9</span></div>
+                                <div class="record-box">31<br><span class="record-index">10</span></div>
+                                <div class="record-box">37<br><span class="record-index">11</span></div>
+                                <div class="record-box">41<br><span class="record-index">12</span></div>
+                                <div class="record-box">43<br><span class="record-index">13</span></div>
+                                <div class="record-box">47<br><span class="record-index">14</span></div>
+                                <div class="record-box">53<br><span class="record-index">15</span></div>
+                                <div class="record-box high">59<br><span class="record-index">16</span></div>
+                            </div>
+                            <div class="search-step">
+                                <span class="step-label">Step 1: Check mid</span>
+                                <div class="record-box">29<br><span class="record-index">9</span></div>
+                                <div class="record-box mid">31<br><span class="record-index">10</span></div>
+                                <div class="record-box">37<br><span class="record-index">11</span></div>
+                                <div class="record-box">41<br><span class="record-index">12</span></div>
+                                <div class="record-box">43<br><span class="record-index">13</span></div>
+                                <div class="record-box">47<br><span class="record-index">14</span></div>
+                                <div class="record-box">53<br><span class="record-index">15</span></div>
+                                <div class="record-box">59<br><span class="record-index">16</span></div>
+                            </div>
+                            <div class="search-step">
+                                <span class="step-label">Step 2: Check mid</span>
+                                <div class="record-box">37<br><span class="record-index">11</span></div>
+                                <div class="record-box mid">41<br><span class="record-index">12</span></div>
+                                <div class="record-box">43<br><span class="record-index">13</span></div>
+                                <div class="record-box">47<br><span class="record-index">14</span></div>
+                            </div>
+                            <div class="search-step">
+                                <span class="step-label">Step 3: Found!</span>
+                                <div class="record-box found">37<br><span class="record-index">11</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-grid">
+                    <div class="comparison-card sequential">
+                        <div class="comparison-title">
+                            <i class="fas fa-list-ol"></i> Sequential Search
+                        </div>
+                        <ul style="padding-left: 20px; color: var(--text-dim);">
+                            <li><strong>Time Complexity:</strong> O(n)</li>
+                            <li>Checks each record one by one</li>
+                            <li>Works on unsorted files</li>
+                            <li>Best case: 1 comparison</li>
+                            <li>Worst case: n comparisons</li>
+                            <li>Average case: n/2 comparisons</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="comparison-card binary">
+                        <div class="comparison-title">
+                            <i class="fas fa-project-diagram"></i> Binary Search
+                        </div>
+                        <ul style="padding-left: 20px; color: var(--text-dim);">
+                            <li><strong>Time Complexity:</strong> O(log n)</li>
+                            <li>Divides search space in half each step</li>
+                            <li>Requires sorted file by key value</li>
+                            <li>Best case: 1 comparison</li>
+                            <li>Worst case: log₂(n) comparisons</li>
+                            <li>If file size doubles, search time increases by 1</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-chart-line"></i> Performance Analysis</h3>
+                    <div class="section-content">
+                        <div class="complexity-box">
+                            <div class="complexity-item">
+                                <div class="complexity-title">Sequential Search</div>
+                                <div style="color: var(--neon-pink); font-size: 1.5rem; font-weight: 700;">O(n)</div>
+                                <div style="color: var(--text-dim); font-size: 0.9rem;">Linear growth</div>
+                            </div>
+                            
+                            <div class="complexity-item">
+                                <div class="complexity-title">Binary Search</div>
+                                <div style="color: var(--neon-blue); font-size: 1.5rem; font-weight: 700;">O(log n)</div>
+                                <div style="color: var(--text-dim); font-size: 0.9rem;">Logarithmic growth</div>
+                            </div>
+                            
+                            <div class="complexity-item">
+                                <div class="complexity-title">File Doubling</div>
+                                <div style="color: var(--neon-green); font-size: 1.5rem; font-weight: 700;">+1 step</div>
+                                <div style="color: var(--text-dim); font-size: 0.9rem;">Binary search only</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Sorting -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-sort-alpha-down"></i> Key Sorting</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-lightbulb"></i> Key Sorting Concept</h3>
+                    <div class="section-content">
+                        <p>When a file is too large to fit into main memory but needs to be sorted:</p>
+                        <ul class="key-points">
+                            <li>Bring only the keys and their RRNs to main memory</li>
+                            <li>Perform internal sorting of keys in memory</li>
+                            <li>Rewrite the file in sorted order or create an index</li>
+                        </ul>
+                        
+                        <div class="key-sorting-viz">
+                            <div class="memory-viz">
+                                <div class="viz-title">Main Memory (Key Nodes)</div>
+                                <div class="viz-content">
+                                    HARRISON → 0<br>
+                                    KELLOG → 1<br>
+                                    HARRIS → 2<br>
+                                    BELL → 3<br>
+                                    <br>
+                                    <span style="color: var(--neon-green);">↓ After Sorting ↓</span><br>
+                                    <br>
+                                    BELL → 3<br>
+                                    HARRIS → 2<br>
+                                    HARRISON → 0<br>
+                                    KELLOG → 1
+                                </div>
+                            </div>
+                            
+                            <div class="disk-viz">
+                                <div class="viz-title">Disk (Original Records)</div>
+                                <div class="viz-content">
+                                    [0] HARRISON | 387 Eastern...<br>
+                                    [1] KELLOG | 17 Maple...<br>
+                                    [2] HARRIS | 4343 West...<br>
+                                    [3] BELL | 8912 Hill...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-database"></i> Index vs Data File Sorting</h3>
+                    <div class="section-content">
+                        <div class="performance-grid">
+                            <div class="perf-card">
+                                <div class="perf-title">Index Sorting</div>
+                                <div style="color: var(--text-dim);">Sort only keys + RRNs</div>
+                                <div style="color: var(--neon-green); margin-top: 10px; font-weight: 600;">Fast & Efficient</div>
+                            </div>
+                            
+                            <div class="perf-card">
+                                <div class="perf-title">Data File Sorting</div>
+                                <div style="color: var(--text-dim);">Move entire records</div>
+                                <div style="color: var(--neon-pink); margin-top: 10px; font-weight: 600;">Slow & Costly</div>
+                            </div>
+                            
+                            <div class="perf-card">
+                                <div class="perf-title">Memory Usage</div>
+                                <div style="color: var(--text-dim);">Index fits in memory</div>
+                                <div style="color: var(--neon-blue); margin-top: 10px; font-weight: 600;">Optimal</div>
+                            </div>
+                            
+                            <div class="perf-card">
+                                <div class="perf-title">Pinned Records</div>
+                                <div style="color: var(--text-dim);">Move keys, not data</div>
+                                <div style="color: var(--neon-purple); margin-top: 10px; font-weight: 600;">Flexible</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Index Structures -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-cube"></i> Index Structures</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-layer-group"></i> Introduction to Indexing</h3>
+                    <div class="section-content">
+                        <p>An <strong>index</strong> lets us impose order on a file without rearranging the file.</p>
+                        <ul class="key-points">
+                            <li>Indexes provide multiple access paths to a file</li>
+                            <li>Allow keyed access to variable-length record files</li>
+                            <li>Simple indexes use arrays in main memory</li>
+                            <li>Like a library catalog with multiple search options</li>
+                        </ul>
+                        
+                        <div class="index-structure">
+                            <div style="color: var(--neon-green); font-weight: 600; margin-bottom: 10px;">Simple Index for Entry-Sequenced File:</div>
+                            <div class="index-row">
+                                <div class="index-key">ANG3795</div>
+                                <div class="index-ref">→ Byte Offset: 152</div>
+                            </div>
+                            <div class="index-row">
+                                <div class="index-key">LON2312</div>
+                                <div class="index-ref">→ Byte Offset: 17</div>
+                            </div>
+                            <div class="index-row">
+                                <div class="index-key">RCA2626</div>
+                                <div class="index-ref">→ Byte Offset: 62</div>
+                            </div>
+                            <div class="index-row">
+                                <div class="index-key">WAR23699</div>
+                                <div class="index-ref">→ Byte Offset: 117</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-search-plus"></i> How Index Search Works</h3>
+                    <div class="section-content">
+                        <ol class="key-points">
+                            <li>Binary search in the index (in main memory)</li>
+                            <li>Find key → get reference field (byte offset)</li>
+                            <li>Seek to record position using reference field</li>
+                            <li>Access record directly from disk</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-exclamation-triangle"></i> Index Maintenance Issues</h3>
+                    <div class="section-content">
+                        <div class="operations-viz">
+                            <div class="op-card add">
+                                <div class="op-title">Record Addition</div>
+                                <div style="color: var(--text-dim); font-size: 0.9rem;">
+                                    Append data file + insert in index
+                                </div>
+                            </div>
+                            
+                            <div class="op-card delete">
+                                <div class="op-title">Record Deletion</div>
+                                <div style="color: var(--text-dim); font-size: 0.9rem;">
+                                    Delete from data file + remove from index
+                                </div>
+                            </div>
+                            
+                            <div class="op-card update">
+                                <div class="op-title">Record Update</div>
+                                <div style="color: var(--text-dim); font-size: 0.9rem;">
+                                    Delete + insert if key changes
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <p><strong>Persistent Index:</strong> Storing index in a file when not in main memory</p>
+                        <p><strong>Safeguards:</strong> Status flag in index header + reconstruction procedure</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Large Indexes -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-expand-alt"></i> Large Index Management</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-hdd"></i> Indexes Too Large for Memory</h3>
+                    <div class="section-content">
+                        <p>When indexes don't fit into main memory:</p>
+                        <ul class="key-points">
+                            <li>Binary searching occurs on disk (multiple seekg() calls)</li>
+                            <li>Index rearrangement requires shifting on disk</li>
+                            <li>Performance decreases significantly</li>
+                        </ul>
+                        
+                        <div style="background: rgba(255, 0, 255, 0.1); padding: 20px; border-radius: 8px; margin: 20px 0;">
+                            <p style="color: var(--neon-pink); font-weight: 600; margin-bottom: 10px;">Two Main Alternatives:</p>
+                            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                                <div style="flex: 1; min-width: 200px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 6px;">
+                                    <p style="color: var(--neon-blue); font-weight: 600;">Tree-Structured Index</p>
+                                    <p style="color: var(--text-dim); font-size: 0.9rem;">B-trees and B+ trees</p>
+                                </div>
+                                <div style="flex: 1; min-width: 200px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 6px;">
+                                    <p style="color: var(--neon-green); font-weight: 600;">Hashed Organization</p>
+                                    <p style="color: var(--text-dim); font-size: 0.9rem;">Direct key addressing</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Multiple Key Access -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-keyboard"></i> Multiple Key Access</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-th"></i> Secondary Key Indexing</h3>
+                    <div class="section-content">
+                        <p>Primary index allows access by primary key only. Secondary indexes provide access by other fields.</p>
+                        <p><strong>Example:</strong> Music recordings database with multiple access paths:</p>
+                        
+                        <div class="multi-key-viz">
+                            <div class="key-index-card">
+                                <div class="key-index-title">Composer Index</div>
+                                <div style="color: var(--text-dim); font-family: monospace; line-height: 1.8;">
+                                    Beethoven → ANG3795<br>
+                                    Beethoven → DG139201<br>
+                                    Beethoven → DG18807<br>
+                                    Corea → WAR23699<br>
+                                    Dvorak → COL31809
+                                </div>
+                            </div>
+                            
+                            <div class="key-index-card">
+                                <div class="key-index-title">Artist Index</div>
+                                <div style="color: var(--text-dim); font-family: monospace; line-height: 1.8;">
+                                    Prokofiev → LON2312<br>
+                                    Beethoven → RCA2626<br>
+                                    Corea → WAR23699<br>
+                                    Springsteen → COL38358
+                                </div>
+                            </div>
+                            
+                            <div class="key-index-card">
+                                <div class="key-index-title">Label Index</div>
+                                <div style="color: var(--text-dim); font-family: monospace; line-height: 1.8;">
+                                    LON → LON2312<br>
+                                    RCA → RCA2626<br>
+                                    WAR → WAR23699<br>
+                                    ANG → ANG3795
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-sync-alt"></i> Secondary Key Operations</h3>
+                    <div class="section-content">
+                        <div style="background: rgba(15, 240, 252, 0.1); padding: 20px; border-radius: 8px; margin: 15px 0;">
+                            <p style="color: var(--neon-blue); font-weight: 600; margin-bottom: 10px;">Record Addition:</p>
+                            <p style="color: var(--text-dim);">
+                                Add entry to secondary key index, store in canonical form, keep duplicates sorted by primary key
+                            </p>
+                        </div>
+                        
+                        <div style="background: rgba(255, 0, 255, 0.1); padding: 20px; border-radius: 8px; margin: 15px 0;">
+                            <p style="color: var(--neon-pink); font-weight: 600; margin-bottom: 10px;">Record Deletion:</p>
+                            <p style="color: var(--text-dim);">
+                                Alternative: Delete from data file and primary index only, leaving secondary indexes unchanged
+                            </p>
+                        </div>
+                        
+                        <div style="background: rgba(0, 255, 157, 0.1); padding: 20px; border-radius: 8px; margin: 15px 0;">
+                            <p style="color: var(--neon-green); font-weight: 600; margin-bottom: 10px;">Record Update:</p>
+                            <p style="color: var(--text-dim);">
+                                1. Change secondary key → rearrange secondary index<br>
+                                2. Change primary key → update primary index + secondary references<br>
+                                3. Change other fields → no index change unless record location changes
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exam Focus Section -->
+            <div class="exam-focus">
+                <h2 class="exam-title"><i class="fas fa-star"></i> Exam Focus Points</h2>
+                <div class="exam-points">
+                    <div class="exam-point">
+                        <h4>Binary Search Algorithm</h4>
+                        <p>Step-by-step process, O(log n) complexity</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Binary vs Sequential Search</h4>
+                        <p>Time complexity comparison, when each is appropriate</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Key Sorting Process</h4>
+                        <p>Bringing keys to memory, sorting, rewriting file</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Index Structure & Purpose</h4>
+                        <p>How indexes work, advantages over file sorting</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Simple Index Implementation</h4>
+                        <p>Key-reference pairs, binary search in memory</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Index Maintenance Operations</h4>
+                        <p>Add, delete, update operations on indexed files</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Large Index Management</h4>
+                        <p>Problems with disk-based indexes, B-trees alternative</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Secondary Key Indexing</h4>
+                        <p>Multiple access paths, composer/artist/label indexes</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Secondary Key Operations</h4>
+                        <p>Special considerations for add/delete/update</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Persistent Index Safeguards</h4>
+                        <p>Status flags, reconstruction procedures</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Takeaways -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-lightbulb"></i> Key Takeaways</h2>
+                <div class="content-section">
+                    <ul class="key-points">
+                        <li>Binary search provides O(log n) performance but requires sorted files</li>
+                        <li>Key sorting brings only keys to memory for efficient sorting of large files</li>
+                        <li>Indexes impose order without rearranging files, providing multiple access paths</li>
+                        <li>A simple index consists of sorted key-reference pairs in memory</li>
+                        <li>Index maintenance (add/delete/update) must keep index synchronized with data file</li>
+                        <li>Large indexes that don't fit in memory require tree structures or hashing</li>
+                        <li>Secondary indexes enable access by multiple keys (composer, artist, label, etc.)</li>
+                        <li>Secondary key operations have special considerations for efficiency</li>
+                        <li>Persistent indexes need safeguards like status flags and reconstruction procedures</li>
+                        <li>Indexing is more efficient than file sorting when dealing with pinned records</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="index.html" class="action-btn btn-main">
+                    <i class="fas fa-home"></i> Back to Main Page
+                </a>
+                <a href="File organization Lecture Ten (10).pdf" class="action-btn btn-download" download>
+                    <i class="fas fa-download"></i> Download Chapter PDF
+                </a>
+            </div>
+        </main>
+
+        <footer>
+            <p>Chapter 10 Summary &copy; 2023 | Created by <span class="footer-highlight">Debuggers' Den Team</span></p>
+            <p style="margin-top: 10px;">This summary covers <span class="footer-highlight">all key points</span> from Chapter 10 for comprehensive exam preparation</p>
+        </footer>
+    </div>
+
+    <script>
+        // Add hover effects to content sections
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(5px)';
+            });
+            
+            section.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+
+        // Add animation to record boxes in binary search
+        const recordBoxes = document.querySelectorAll('.record-box');
+        recordBoxes.forEach((box, index) => {
+            if (box.classList.contains('mid')) {
+                box.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.1)';
+                    this.style.boxShadow = '0 0 20px rgba(255, 0, 255, 0.5)';
+                });
+                
+                box.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1.05)';
+                    this.style.boxShadow = 'none';
+                });
+            }
+            
+            if (box.classList.contains('found')) {
+                box.addEventListener('mouseenter', function() {
+                    this.style.animation = 'pulse 1s infinite';
+                });
+                
+                box.addEventListener('mouseleave', function() {
+                    this.style.animation = 'pulse 1s';
+                });
+            }
+        });
+
+        // Add animation to comparison cards
+        document.querySelectorAll('.comparison-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.3)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = 'none';
+            });
+        });
+
+        // Add animation to performance cards
+        document.querySelectorAll('.perf-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Add click animation to action buttons
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+                
+                // If download button, show loading state
+                if (this.classList.contains('btn-download')) {
+                    const icon = this.querySelector('i');
+                    const originalClass = icon.className;
+                    icon.className = 'fas fa-spinner fa-spin';
+                    
+                    setTimeout(() => {
+                        icon.className = originalClass;
+                    }, 1000);
+                }
+            });
+        });
+
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate sections on load
+            const sections = document.querySelectorAll('.content-section, .glass-panel');
+            sections.forEach((section, index) => {
+                section.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 8: Data Compression | File Organization Master</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --neon-blue: #0ff0fc;
+            --neon-pink: #ff00ff;
+            --neon-green: #00ff9d;
+            --neon-purple: #b967ff;
+            --neon-yellow: #ffeb3b;
+            --dark-bg: #0a0a0f;
+            --dark-surface: rgba(15, 15, 25, 0.85);
+            --text-light: #f0f0f0;
+            --text-dim: #b0b0c0;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(100, 0, 255, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 200, 0.05) 0%, transparent 20%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        header {
+            margin-bottom: 40px;
+            padding-top: 20px;
+            position: relative;
+        }
+
+        .back-nav {
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(15, 240, 252, 0.1);
+            color: var(--neon-blue);
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid rgba(15, 240, 252, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(15, 240, 252, 0.2);
+            box-shadow: 0 0 15px rgba(15, 240, 252, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .chapter-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .chapter-number {
+            font-size: 5rem;
+            font-weight: 800;
+            color: rgba(15, 240, 252, 0.2);
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .chapter-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(15, 240, 252, 0.3);
+        }
+
+        .chapter-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Glass Panel */
+        .glass-panel {
+            background: var(--dark-surface);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .glass-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba(15, 240, 252, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-title {
+            font-size: 1.8rem;
+            color: var(--neon-green);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid rgba(0, 255, 157, 0.2);
+            padding-bottom: 10px;
+        }
+
+        .panel-title i {
+            font-size: 1.5rem;
+        }
+
+        /* Content Sections */
+        .content-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--neon-blue);
+            transition: all 0.3s ease;
+        }
+
+        .content-section:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: var(--neon-blue);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--neon-pink);
+        }
+
+        .section-content {
+            color: var(--text-dim);
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .key-points {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 10px 0 10px 30px;
+            color: var(--text-dim);
+            position: relative;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .key-points li:last-child {
+            border-bottom: none;
+        }
+
+        .key-points li:before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            color: var(--neon-green);
+            font-size: 0.8rem;
+        }
+
+        /* Visualizations */
+        .compression-visualization {
+            display: flex;
+            flex-direction: column;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+        }
+
+        .data-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(15, 240, 252, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(15, 240, 252, 0.3);
+        }
+
+        .original-data {
+            color: var(--neon-green);
+            font-weight: 600;
+            padding: 10px 20px;
+            background: rgba(0, 255, 157, 0.1);
+            border-radius: 6px;
+        }
+
+        .compressed-data {
+            color: var(--neon-pink);
+            font-weight: 600;
+            padding: 10px 20px;
+            background: rgba(255, 0, 255, 0.1);
+            border-radius: 6px;
+        }
+
+        .arrow {
+            color: var(--neon-blue);
+            font-size: 1.5rem;
+            margin: 0 15px;
+        }
+
+        /* Compression Methods Grid */
+        .methods-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .method-card {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-top: 3px solid;
+        }
+
+        .method-card.lossless {
+            border-top-color: var(--neon-blue);
+        }
+
+        .method-card.lossy {
+            border-top-color: var(--neon-pink);
+        }
+
+        .method-title {
+            color: var(--neon-blue);
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .method-card.lossless .method-title {
+            color: var(--neon-blue);
+        }
+
+        .method-card.lossy .method-title {
+            color: var(--neon-pink);
+        }
+
+        /* Entropy Calculation */
+        .entropy-box {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid var(--neon-purple);
+        }
+
+        .formula {
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: var(--neon-yellow);
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+        }
+
+        /* Algorithm Steps */
+        .algorithm-steps {
+            counter-reset: step-counter;
+            margin: 20px 0;
+        }
+
+        .step {
+            position: relative;
+            padding-left: 50px;
+            margin-bottom: 15px;
+            color: var(--text-dim);
+        }
+
+        .step:before {
+            counter-increment: step-counter;
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 30px;
+            height: 30px;
+            background: var(--neon-blue);
+            color: var(--dark-bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Huffman Tree Visualization */
+        .tree-container {
+            display: flex;
+            justify-content: center;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+
+        .tree-node {
+            padding: 10px 15px;
+            background: rgba(15, 240, 252, 0.1);
+            border: 1px solid var(--neon-blue);
+            border-radius: 6px;
+            margin: 5px;
+            text-align: center;
+            min-width: 60px;
+        }
+
+        .tree-node.symbol {
+            background: rgba(0, 255, 157, 0.1);
+            border-color: var(--neon-green);
+        }
+
+        /* Dictionary Table */
+        .dictionary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .dictionary-table th {
+            background: rgba(15, 240, 252, 0.2);
+            padding: 12px;
+            text-align: left;
+            color: var(--neon-blue);
+            font-weight: 600;
+        }
+
+        .dictionary-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-dim);
+        }
+
+        /* Run-length Encoding */
+        .rle-example {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 0, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .pixel {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .pixel.zero {
+            background: rgba(15, 240, 252, 0.2);
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        .pixel.value {
+            background: rgba(255, 0, 255, 0.2);
+            border: 1px solid var(--neon-pink);
+            color: var(--neon-pink);
+        }
+
+        /* Exam Focus Box */
+        .exam-focus {
+            background: rgba(255, 235, 59, 0.1);
+            border: 1px solid rgba(255, 235, 59, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exam-focus:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 235, 59, 0.05), transparent);
+        }
+
+        .exam-title {
+            color: var(--neon-yellow);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .exam-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .exam-point {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--neon-yellow);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .btn-main {
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            color: white;
+            border: none;
+        }
+
+        .btn-download {
+            background: rgba(255, 0, 255, 0.1);
+            color: var(--neon-pink);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-main:hover {
+            background: linear-gradient(to right, var(--neon-pink), var(--neon-blue));
+        }
+
+        .btn-download:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .footer-highlight {
+            color: var(--neon-green);
+            font-weight: 600;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes compress {
+            0% { width: 100%; }
+            100% { width: 40%; }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .methods-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .chapter-number {
+                font-size: 4rem;
+            }
+            
+            .chapter-title {
+                font-size: 2rem;
+            }
+            
+            .glass-panel {
+                padding: 20px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .exam-points {
+                grid-template-columns: 1fr;
+            }
+            
+            .data-flow {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .arrow {
+                transform: rotate(90deg);
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .chapter-number {
+                font-size: 3rem;
+            }
+            
+            .chapter-title {
+                font-size: 1.8rem;
+            }
+            
+            .panel-title {
+                font-size: 1.5rem;
+            }
+            
+            .tree-container {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Back Navigation -->
+        <header>
+            <div class="back-nav">
+                <a href="index.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Main Page
+                </a>
+            </div>
+            
+            <div class="chapter-header">
+                <div class="chapter-number">08</div>
+                <h1 class="chapter-title">Data Compression Methods</h1>
+                <p class="chapter-subtitle">Lossless Compression, Entropy, Run-length Encoding, Huffman Coding, and Lempel-Ziv Codes</p>
+            </div>
+        </header>
+
+        <main>
+            <!-- Chapter Overview -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-graduation-cap"></i> Chapter Overview</h2>
+                <div class="content-section">
+                    <p class="section-content">
+                        This chapter explores data compression techniques that reduce file size for storage and transmission efficiency. 
+                        It covers the mathematical foundation of compression (entropy), lossless vs. lossy methods, and three key 
+                        lossless algorithms: Run-length Encoding, Huffman Coding, and Lempel-Ziv Codes.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Why Compress Data? -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-compress-alt"></i> Why Compress Data?</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-bullseye"></i> Key Benefits</h3>
+                    <div class="section-content">
+                        <ul class="key-points">
+                            <li><strong>Less storage space</strong> required</li>
+                            <li><strong>Faster transmission</strong> over networks</li>
+                            <li><strong>Decreased access time</strong> for reading/writing</li>
+                            <li><strong>Faster sequential processing</strong></li>
+                            <li><strong>Optimized resource utilization</strong></li>
+                            <li>Reduced I/O bus load when compression/decompression done in I/O processor</li>
+                        </ul>
+                        
+                        <div class="compression-visualization">
+                            <div class="data-flow">
+                                <div class="original-data">25 MB File</div>
+                                <div class="arrow"><i class="fas fa-arrow-right"></i></div>
+                                <div style="color: var(--neon-yellow); font-weight: 600;">COMPRESSION</div>
+                                <div class="arrow"><i class="fas fa-arrow-right"></i></div>
+                                <div class="compressed-data">128 KB File</div>
+                            </div>
+                            <p style="text-align: center; color: var(--text-dim); font-size: 0.9rem; margin-top: 10px;">
+                                <strong>99.5% size reduction!</strong> Same information, much smaller footprint.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Compression Methods -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-code-branch"></i> Data Compression Methods</h2>
+                
+                <div class="methods-grid">
+                    <div class="method-card lossless">
+                        <div class="method-title">
+                            <i class="fas fa-check-circle"></i> Lossless Methods
+                        </div>
+                        <ul style="padding-left: 20px; color: var(--text-dim);">
+                            <li><strong>Original = Decompressed</strong> (exact same data)</li>
+                            <li>Redundant data removed during compression</li>
+                            <li>Used for: Legal/medical documents, computer programs</li>
+                            <li><strong>Examples:</strong></li>
+                            <li>• Run-length Encoding (RLE)</li>
+                            <li>• Huffman Coding</li>
+                            <li>• Lempel-Ziv Codes (LZ78, LZW)</li>
+                            <li>Used in: ZIP, PNG, GIF files</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="method-card lossy">
+                        <div class="method-title">
+                            <i class="fas fa-chart-line"></i> Lossy Methods
+                        </div>
+                        <ul style="padding-left: 20px; color: var(--text-dim);">
+                            <li><strong>Original ≠ Decompressed</strong> (some data lost)</li>
+                            <li>Removes "less important" data</li>
+                            <li>Used for: Images, audio, video where perfection isn't critical</li>
+                            <li><strong>Examples:</strong></li>
+                            <li>• JPEG (images)</li>
+                            <li>• MPEG (video)</li>
+                            <li>• MP3 (audio)</li>
+                            <li>Higher compression ratios than lossless</li>
+                            <li>Not covered in detail in this chapter</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Entropy: The Math Behind Compression -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-calculator"></i> Entropy: The Math Behind Compression</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-info-circle"></i> What is Entropy?</h3>
+                    <div class="section-content">
+                        <p><strong>Entropy</strong> measures the information content in a message. Higher entropy = more information.</p>
+                        
+                        <div class="entropy-box">
+                            <p style="color: var(--neon-purple); font-weight: 600; margin-bottom: 10px;">Entropy Formula:</p>
+                            <div class="formula">
+                                H(x) = -p(x) · log₂ p(x)
+                            </div>
+                            <p style="color: var(--text-dim); margin-top: 10px;">
+                                Where: <br>
+                                • <strong>p(x)</strong> = probability of symbol x appearing<br>
+                                • <strong>H(x)</strong> = information carried by symbol x (in bits)<br>
+                                • <strong>log₂</strong> = logarithm base 2 (bits)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-lightbulb"></i> Key Insights</h3>
+                    <div class="section-content">
+                        <ul class="key-points">
+                            <li><strong>Rare symbols</strong> → High probability → Low entropy → <span style="color: var(--neon-green);">Carry more information</span></li>
+                            <li><strong>Common symbols</strong> → Low probability → High entropy → <span style="color: var(--neon-blue);">Carry less information</span></li>
+                            <li>The <strong>negative sign</strong> makes entropy positive (log of probabilities 0-1 is negative)</li>
+                            <li><strong>Total entropy</strong> = Sum of H(x) for all symbols = Average information per symbol</li>
+                            <li>Entropy value represents the <strong>theoretical minimum bits per symbol</strong> for optimal compression</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-list-ol"></i> Example Calculation</h3>
+                    <div class="section-content">
+                        <p>Message: <strong>A A A B B C</strong> (6 symbols total)</p>
+                        
+                        <table class="dictionary-table">
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Count</th>
+                                    <th>Probability p(x)</th>
+                                    <th>log₂ p(x)</th>
+                                    <th>Entropy H(x)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>A</td>
+                                    <td>3</td>
+                                    <td>3/6 = 0.5</td>
+                                    <td>log₂(0.5) = -1</td>
+                                    <td>-0.5 × (-1) = <strong>0.5 bits</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>B</td>
+                                    <td>2</td>
+                                    <td>2/6 ≈ 0.333</td>
+                                    <td>log₂(0.333) ≈ -1.585</td>
+                                    <td>-0.333 × (-1.585) ≈ <strong>0.523 bits</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>C</td>
+                                    <td>1</td>
+                                    <td>1/6 ≈ 0.167</td>
+                                    <td>log₂(0.167) ≈ -2.585</td>
+                                    <td>-0.167 × (-2.585) ≈ <strong>0.432 bits</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div style="margin-top: 15px; padding: 15px; background: rgba(0, 255, 157, 0.1); border-radius: 8px;">
+                            <p style="color: var(--neon-green); font-weight: 600;">Total Entropy (H):</p>
+                            <p style="color: var(--text-dim);">H = H(A) + H(B) + H(C) = 0.5 + 0.523 + 0.432 ≈ <strong>1.455 bits/symbol</strong></p>
+                            <p style="color: var(--text-dim); font-size: 0.9rem; margin-top: 5px;">
+                                This is the theoretical limit: Optimal compression needs at least 1.46 bits per symbol on average.
+                                Huffman coding tries to achieve this limit.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Run-length Encoding (RLE) -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-retweet"></i> Run-length Encoding (RLE)</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-exchange-alt"></i> How RLE Works</h3>
+                    <div class="section-content">
+                        <p>The simplest compression method. Replaces consecutive repeating symbols with:</p>
+                        <div style="text-align: center; margin: 15px 0; padding: 10px; background: rgba(15, 240, 252, 0.1); border-radius: 6px;">
+                            <p style="color: var(--neon-blue); font-weight: 600;">[SYMBOL] + [COUNT]</p>
+                        </div>
+                        
+                        <div class="rle-example">
+                            <div class="pixel zero">0</div>
+                            <div class="pixel zero">0</div>
+                            <div class="pixel zero">0</div>
+                            <div class="pixel zero">0</div>
+                            <div class="pixel zero">0</div>
+                            <div class="pixel zero">0</div>
+                            <div class="pixel zero">0</div>
+                            <div class="pixel value">255</div>
+                            <div class="pixel zero">0</div>
+                            <div class="pixel value">255</div>
+                            <div class="pixel zero">0</div>
+                            <div class="pixel zero">0</div>
+                            <div class="pixel zero">0</div>
+                        </div>
+                        
+                        <p style="margin-top: 15px; text-align: center; color: var(--neon-green); font-weight: 600;">
+                            Original: 0 0 0 0 0 0 0 255 0 255 0 0 0<br>
+                            <i class="fas fa-arrow-down" style="margin: 10px 0;"></i><br>
+                            RLE: <strong>FF 0 07</strong> 255 <strong>FF 255 01</strong> 0 <strong>FF 0 03</strong>
+                        </p>
+                        
+                        <div style="margin-top: 15px; padding: 15px; background: rgba(255, 0, 255, 0.1); border-radius: 8px;">
+                            <p style="color: var(--neon-pink); font-weight: 600;">RLE Algorithm:</p>
+                            <ul style="padding-left: 20px; color: var(--text-dim); margin-top: 10px;">
+                                <li>Read pixels sequentially</li>
+                                <li>When same value repeats >1 time, substitute with 3 bytes:</li>
+                                <li>1. <strong>Special code</strong> (e.g., 0xFF = run-length indicator)</li>
+                                <li>2. <strong>Pixel value</strong> being repeated</li>
+                                <li>3. <strong>Count</strong> of repetitions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-exclamation-triangle"></i> RLE Limitations</h3>
+                    <div class="section-content">
+                        <ul class="key-points">
+                            <li><strong>No guaranteed space savings</strong> - sometimes compressed file is LARGER than original</li>
+                            <li>Worst case: No repeated symbols → Each symbol becomes 3 bytes instead of 1</li>
+                            <li>Example: "22 23 24 25 26" becomes "22 23 24 25 26" (no benefit)</li>
+                            <li>Best for: Images with large uniform areas (black/white docs, simple graphics)</li>
+                            <li>Used in: PCX, BMP (optional), early fax machines</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Huffman Coding -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-sitemap"></i> Huffman Coding</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-project-diagram"></i> Core Principle</h3>
+                    <div class="section-content">
+                        <p>Assign <strong>shorter codes</strong> to frequent symbols, <strong>longer codes</strong> to rare symbols.</p>
+                        
+                        <div class="algorithm-steps">
+                            <div class="step">Make a leaf node for each symbol with its probability</div>
+                            <div class="step">Take two nodes with smallest probabilities, connect them</div>
+                            <div class="step">Assign 0/1 to branches, new node probability = sum of children</div>
+                            <div class="step">Repeat step 2 until only one node remains (root)</div>
+                            <div class="step">Read codes from root to leaves (0 for left, 1 for right)</div>
+                        </div>
+                        
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(255, 235, 59, 0.1); border-radius: 8px;">
+                            <p style="color: var(--neon-yellow); font-weight: 600;">Important Properties:</p>
+                            <ul style="padding-left: 20px; color: var(--text-dim); margin-top: 10px;">
+                                <li><strong>No unique Huffman code</strong> - multiple valid trees possible</li>
+                                <li><strong>All Huffman codes have same average code length</strong></li>
+                                <li><strong>Prefix-free code</strong>: No code is prefix of another (enables instant decoding)</li>
+                                <li>Tries to achieve the <strong>entropy limit</strong> (optimal compression)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-code"></i> Example: Encoding/Decoding</h3>
+                    <div class="section-content">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 15px 0;">
+                            <div style="padding: 15px; background: rgba(0, 255, 157, 0.1); border-radius: 8px;">
+                                <p style="color: var(--neon-green); font-weight: 600; margin-bottom: 10px;">Encoding</p>
+                                <p style="color: var(--text-dim);">
+                                    <strong>Text:</strong> EAEBAECDEA<br>
+                                    <strong>Codes:</strong><br>
+                                    A → 00<br>
+                                    B → 010<br>
+                                    C → 011<br>
+                                    D → 10<br>
+                                    E → 11<br>
+                                    <strong>Encoded:</strong> 11 00 11 010 00 11 011 10 11 00
+                                </p>
+                            </div>
+                            
+                            <div style="padding: 15px; background: rgba(255, 0, 255, 0.1); border-radius: 8px;">
+                                <p style="color: var(--neon-pink); font-weight: 600; margin-bottom: 10px;">Decoding</p>
+                                <p style="color: var(--text-dim);">
+                                    <strong>Encoded:</strong> 1100110100011011101100<br>
+                                    <strong>Process:</strong><br>
+                                    11 → E<br>
+                                    00 → A<br>
+                                    11 → E<br>
+                                    010 → B<br>
+                                    00 → A<br>
+                                    11 → E<br>
+                                    011 → C<br>
+                                    10 → D<br>
+                                    11 → E<br>
+                                    00 → A<br>
+                                    <strong>Decoded:</strong> EAEBAECDEA ✓
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lempel-Ziv Codes (LZ78) -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-book"></i> Lempel-Ziv Codes (LZ78)</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-database"></i> Dictionary-Based Compression</h3>
+                    <div class="section-content">
+                        <p>Builds a <strong>dictionary</strong> of strings during compression. Replaces repeated strings with <strong>dictionary indices</strong>.</p>
+                        
+                        <div class="algorithm-steps">
+                            <div class="step">Start with empty dictionary</div>
+                            <div class="step">Find shortest substring not in dictionary</div>
+                            <div class="step">Add substring to dictionary with next index</div>
+                            <div class="step">Replace substring with (previous index + new character)</div>
+                            <div class="step">Repeat until entire string processed</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-list-ol"></i> Example: LZ78 Encoding</h3>
+                    <div class="section-content">
+                        <p><strong>Input:</strong> a a a b a b b b a a a b a a a a a a a b a a b b</p>
+                        
+                        <table class="dictionary-table">
+                            <thead>
+                                <tr>
+                                    <th>Step</th>
+                                    <th>Parsed String</th>
+                                    <th>Dictionary Entry</th>
+                                    <th>Encoded As</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>a</td>
+                                    <td>1: a</td>
+                                    <td>0a</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>aa</td>
+                                    <td>2: aa</td>
+                                    <td>1a</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>b</td>
+                                    <td>3: b</td>
+                                    <td>0b</td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td>ab</td>
+                                    <td>4: ab</td>
+                                    <td>1b</td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td>bb</td>
+                                    <td>5: bb</td>
+                                    <td>3b</td>
+                                </tr>
+                                <tr>
+                                    <td>6</td>
+                                    <td>aaa</td>
+                                    <td>6: aaa</td>
+                                    <td>2a</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div style="margin-top: 15px; padding: 15px; background: rgba(185, 103, 255, 0.1); border-radius: 8px;">
+                            <p style="color: var(--neon-purple); font-weight: 600;">Key Insight:</p>
+                            <p style="color: var(--text-dim);">
+                                Each piece is <strong>concatenation of previous piece + new character</strong>.<br>
+                                Encoded as: <strong>(previous index) + (new character)</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-cogs"></i> LZ78 in Practice</h3>
+                    <div class="section-content">
+                        <ul class="key-points">
+                            <li>Used in: <strong>ZIP, UNIX compress, GIF, PDF</strong></li>
+                            <li><strong>Adaptive</strong>: Dictionary built during compression</li>
+                            <li><strong>Both sides need dictionary</strong> (built during compression, rebuilt during decompression)</li>
+                            <li><strong>Decompression</strong> is inverse process: rebuild dictionary from encoded stream</li>
+                            <li>Excellent for text with repeated phrases/patterns</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compression Method Comparison -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-balance-scale"></i> Compression Method Comparison</h2>
+                
+                <div class="content-section">
+                    <div class="section-content">
+                        <table class="dictionary-table">
+                            <thead>
+                                <tr>
+                                    <th>Method</th>
+                                    <th>Type</th>
+                                    <th>Key Idea</th>
+                                    <th>Best For</th>
+                                    <th>Limitations</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Run-length</strong></td>
+                                    <td>Lossless</td>
+                                    <td>Replace repeats with count</td>
+                                    <td>Simple images, fax</td>
+                                    <td>No guarantee, can expand data</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Huffman</strong></td>
+                                    <td>Lossless</td>
+                                    <td>Variable-length codes</td>
+                                    <td>Text, general data</td>
+                                    <td>Needs probability distribution</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Lempel-Ziv</strong></td>
+                                    <td>Lossless</td>
+                                    <td>Dictionary of strings</td>
+                                    <td>Text, code, patterns</td>
+                                    <td>Memory for dictionary</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Entropy</strong></td>
+                                    <td>Theory</td>
+                                    <td>Information measurement</td>
+                                    <td>Compression limits</td>
+                                    <td>Theoretical, not practical</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exam Focus Section -->
+            <div class="exam-focus">
+                <h2 class="exam-title"><i class="fas fa-star"></i> Exam Focus Points</h2>
+                <div class="exam-points">
+                    <div class="exam-point">
+                        <h4>Entropy Calculation</h4>
+                        <p>H(x) = -p(x)·log₂p(x), symbol probabilities, total entropy</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Lossless vs Lossy</h4>
+                        <p>Differences, use cases, examples of each type</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Run-length Encoding</h4>
+                        <p>Algorithm, when it works well, limitations</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Huffman Coding</h4>
+                        <p>Tree construction, variable-length codes, prefix property</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Lempel-Ziv (LZ78)</h4>
+                        <p>Dictionary building, encoding steps, practical uses</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Compression Benefits</h4>
+                        <p>Why compress? Storage, transmission, processing advantages</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Algorithm Steps</h4>
+                        <p>Step-by-step procedures for each compression method</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Real-world Applications</h4>
+                        <p>ZIP, GIF, PNG, UNIX compress, file formats using each method</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Takeaways -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-lightbulb"></i> Key Takeaways</h2>
+                <div class="content-section">
+                    <ul class="key-points">
+                        <li><strong>Entropy</strong> measures information content: H(x) = -p(x)·log₂p(x); rare symbols have higher entropy</li>
+                        <li><strong>Lossless compression</strong> preserves all data (RLE, Huffman, LZ); <strong>Lossy</strong> sacrifices some data (JPEG, MPEG)</li>
+                        <li><strong>Run-length Encoding</strong> replaces consecutive repeats with (symbol + count); simple but can expand data</li>
+                        <li><strong>Huffman Coding</strong> assigns shorter codes to frequent symbols via binary tree; achieves entropy limit</li>
+                        <li><strong>Lempel-Ziv (LZ78)</strong> builds dictionary of strings; encodes as (index + new char); used in ZIP, GIF</li>
+                        <li>Compression benefits: <strong>Less storage, faster transmission, reduced access time</strong></li>
+                        <li>No single "best" method - choice depends on data type and requirements</li>
+                        <li>Real-world tools combine methods (e.g., ZIP uses LZ77 + Huffman)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="index.html" class="action-btn btn-main">
+                    <i class="fas fa-home"></i> Back to Main Page
+                </a>
+                <a href="File organization the eighth lecture (8)-1.pdf" class="action-btn btn-download" download>
+                    <i class="fas fa-download"></i> Download Chapter PDF
+                </a>
+            </div>
+        </main>
+
+        <footer>
+            <p>Chapter 8 Summary &copy; 2023 | Created by <span class="footer-highlight">Debuggers' Den Team</span></p>
+            <p style="margin-top: 10px;">This summary covers <span class="footer-highlight">all key points</span> from Chapter 8 for comprehensive exam preparation</p>
+        </footer>
+    </div>
+
+    <script>
+        // Add hover effects to content sections
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(5px)';
+            });
+            
+            section.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+
+        // Add animation to data flow visualization
+        const dataFlow = document.querySelector('.data-flow');
+        if (dataFlow) {
+            dataFlow.addEventListener('mouseenter', function() {
+                const original = this.querySelector('.original-data');
+                const compressed = this.querySelector('.compressed-data');
+                const arrows = this.querySelectorAll('.arrow');
+                
+                original.style.animation = 'pulse 1s ease-in-out';
+                compressed.style.animation = 'pulse 1s ease-in-out 0.5s';
+                
+                arrows.forEach(arrow => {
+                    arrow.style.animation = 'pulse 1s ease-in-out 0.25s';
+                });
+                
+                setTimeout(() => {
+                    original.style.animation = '';
+                    compressed.style.animation = '';
+                    arrows.forEach(arrow => arrow.style.animation = '');
+                }, 1500);
+            });
+        }
+
+        // Add animation to method cards
+        document.querySelectorAll('.method-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.3)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = 'none';
+            });
+        });
+
+        // Add click animation to action buttons
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+                
+                // If download button, show loading state
+                if (this.classList.contains('btn-download')) {
+                    const icon = this.querySelector('i');
+                    const originalClass = icon.className;
+                    icon.className = 'fas fa-spinner fa-spin';
+                    
+                    setTimeout(() => {
+                        icon.className = originalClass;
+                    }, 1000);
+                }
+            });
+        });
+
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate sections on load
+            const sections = document.querySelectorAll('.content-section, .glass-panel');
+            sections.forEach((section, index) => {
+                section.style.animationDelay = `${index * 0.1}s`;
+            });
+            
+            // Pulse animation for formula
+            const formula = document.querySelector('.formula');
+            if (formula) {
+                setInterval(() => {
+                    formula.style.animation = 'pulse 2s ease-in-out';
+                    setTimeout(() => {
+                        formula.style.animation = '';
+                    }, 2000);
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>

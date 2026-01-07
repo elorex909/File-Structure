@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 6: Managing Files of Records | File Organization Master</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --neon-blue: #0ff0fc;
+            --neon-pink: #ff00ff;
+            --neon-green: #00ff9d;
+            --neon-purple: #b967ff;
+            --neon-yellow: #ffeb3b;
+            --dark-bg: #0a0a0f;
+            --dark-surface: rgba(15, 15, 25, 0.85);
+            --text-light: #f0f0f0;
+            --text-dim: #b0b0c0;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(100, 0, 255, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 200, 0.05) 0%, transparent 20%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        header {
+            margin-bottom: 40px;
+            padding-top: 20px;
+            position: relative;
+        }
+
+        .back-nav {
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(15, 240, 252, 0.1);
+            color: var(--neon-blue);
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid rgba(15, 240, 252, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(15, 240, 252, 0.2);
+            box-shadow: 0 0 15px rgba(15, 240, 252, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .chapter-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .chapter-number {
+            font-size: 5rem;
+            font-weight: 800;
+            color: rgba(15, 240, 252, 0.2);
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .chapter-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(15, 240, 252, 0.3);
+        }
+
+        .chapter-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Glass Panel */
+        .glass-panel {
+            background: var(--dark-surface);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .glass-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba(15, 240, 252, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-title {
+            font-size: 1.8rem;
+            color: var(--neon-green);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid rgba(0, 255, 157, 0.2);
+            padding-bottom: 10px;
+        }
+
+        .panel-title i {
+            font-size: 1.5rem;
+        }
+
+        /* Content Sections */
+        .content-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--neon-blue);
+            transition: all 0.3s ease;
+        }
+
+        .content-section:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: var(--neon-blue);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--neon-pink);
+        }
+
+        .section-content {
+            color: var(--text-dim);
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .key-points {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 10px 0 10px 30px;
+            color: var(--text-dim);
+            position: relative;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .key-points li:last-child {
+            border-bottom: none;
+        }
+
+        .key-points li:before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            color: var(--neon-green);
+            font-size: 0.8rem;
+        }
+
+        /* Search Visualization */
+        .search-viz {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+        }
+
+        .record-line {
+            display: flex;
+            width: 100%;
+            margin: 5px 0;
+            position: relative;
+        }
+
+        .record-box {
+            flex: 1;
+            padding: 12px;
+            background: rgba(15, 240, 252, 0.1);
+            border: 1px solid rgba(15, 240, 252, 0.3);
+            border-radius: 6px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .record-box.searched {
+            background: rgba(255, 0, 255, 0.2);
+            border-color: var(--neon-pink);
+            animation: pulse 1s;
+        }
+
+        .record-box.found {
+            background: rgba(0, 255, 157, 0.2);
+            border-color: var(--neon-green);
+            transform: scale(1.05);
+        }
+
+        .record-id {
+            color: var(--neon-blue);
+            font-weight: 600;
+        }
+
+        /* Key Comparison */
+        .key-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .key-card {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-top: 3px solid;
+        }
+
+        .key-card.primary {
+            border-top-color: var(--neon-blue);
+        }
+
+        .key-card.secondary {
+            border-top-color: var(--neon-pink);
+        }
+
+        .key-title {
+            color: var(--neon-blue);
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .key-card.primary .key-title {
+            color: var(--neon-blue);
+        }
+
+        .key-card.secondary .key-title {
+            color: var(--neon-pink);
+        }
+
+        /* Direct Access Visualization */
+        .direct-access-viz {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 25px 0;
+        }
+
+        .index-file {
+            display: flex;
+            width: 100%;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(15, 240, 252, 0.1);
+            border-radius: 8px;
+            border: 1px solid var(--neon-blue);
+        }
+
+        .index-entry {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .index-entry:last-child {
+            border-right: none;
+        }
+
+        .data-file {
+            width: 100%;
+            padding: 20px;
+            background: rgba(255, 0, 255, 0.1);
+            border-radius: 8px;
+            border: 1px solid var(--neon-pink);
+            font-family: monospace;
+            overflow-x: auto;
+        }
+
+        /* Performance Comparison */
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .perf-card {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .perf-card:hover {
+            border-color: var(--neon-yellow);
+            transform: translateY(-5px);
+        }
+
+        .perf-title {
+            color: var(--neon-yellow);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        /* Header Record Visualization */
+        .header-viz {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .header-field {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px;
+            background: rgba(0, 255, 157, 0.1);
+            border-radius: 6px;
+            border-left: 3px solid var(--neon-green);
+        }
+
+        .field-label {
+            min-width: 150px;
+            color: var(--neon-green);
+            font-weight: 600;
+        }
+
+        /* Time Complexity */
+        .complexity-box {
+            display: flex;
+            justify-content: space-between;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .complexity-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .complexity-title {
+            color: var(--neon-purple);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        /* Exam Focus Box */
+        .exam-focus {
+            background: rgba(255, 235, 59, 0.1);
+            border: 1px solid rgba(255, 235, 59, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exam-focus:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 235, 59, 0.05), transparent);
+        }
+
+        .exam-title {
+            color: var(--neon-yellow);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .exam-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .exam-point {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--neon-yellow);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .btn-main {
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            color: white;
+            border: none;
+        }
+
+        .btn-download {
+            background: rgba(255, 0, 255, 0.1);
+            color: var(--neon-pink);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-main:hover {
+            background: linear-gradient(to right, var(--neon-pink), var(--neon-blue));
+        }
+
+        .btn-download:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .footer-highlight {
+            color: var(--neon-green);
+            font-weight: 600;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes searchMove {
+            0% { left: 0; }
+            100% { left: calc(100% - 20px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .chapter-number {
+                font-size: 4rem;
+            }
+            
+            .chapter-title {
+                font-size: 2rem;
+            }
+            
+            .glass-panel {
+                padding: 20px;
+            }
+            
+            .key-comparison,
+            .exam-points {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .performance-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .complexity-box {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .record-line {
+                flex-wrap: wrap;
+            }
+            
+            .record-box {
+                min-width: 100px;
+                margin: 2px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .chapter-number {
+                font-size: 3rem;
+            }
+            
+            .chapter-title {
+                font-size: 1.8rem;
+            }
+            
+            .panel-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Back Navigation -->
+        <header>
+            <div class="back-nav">
+                <a href="index.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Main Page
+                </a>
+            </div>
+            
+            <div class="chapter-header">
+                <div class="chapter-number">06</div>
+                <h1 class="chapter-title">Managing Files of Records</h1>
+                <p class="chapter-subtitle">Record Access, Keys, Sequential Search, Direct Access, and Header Records</p>
+            </div>
+        </header>
+
+        <main>
+            <!-- Chapter Overview -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-graduation-cap"></i> Chapter Overview</h2>
+                <div class="content-section">
+                    <p class="section-content">
+                        This chapter focuses on techniques for accessing records within files, including different 
+                        types of keys, search methods (sequential and direct), and the role of header records in 
+                        file organization and management.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Record Keys -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-key"></i> Record Keys</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-fingerprint"></i> What is a Key?</h3>
+                    <div class="section-content">
+                        <p>A <strong>key</strong> is a subset of the fields in a record used to uniquely identify the record.</p>
+                        <ul class="key-points">
+                            <li>Keys correspond to fields or combinations of fields used in search operations</li>
+                            <li>Not every field in a record is necessarily a key</li>
+                            <li>Keys must have a canonical form (consistent representation)</li>
+                            <li>Keys are not dataless - they contain actual data values</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="key-comparison">
+                    <div class="key-card primary">
+                        <div class="key-title">
+                            <i class="fas fa-star"></i> Primary Key
+                        </div>
+                        <ul style="padding-left: 20px; color: var(--text-dim);">
+                            <li><strong>Must identify records uniquely</strong></li>
+                            <li>Not dataless (contains actual values)</li>
+                            <li>Has canonical form</li>
+                            <li>Example: Student ID, Employee Number</li>
+                            <li>Used for exact record identification</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="key-card secondary">
+                        <div class="key-title">
+                            <i class="fas fa-search"></i> Secondary Key
+                        </div>
+                        <ul style="padding-left: 20px; color: var(--text-dim);">
+                            <li><strong>Does not identify records uniquely</strong></li>
+                            <li>Not dataless (contains actual values)</li>
+                            <li>Has canonical form</li>
+                            <li>Example: Student Name, Department</li>
+                            <li>Used for searching/categorizing records</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-database"></i> Key Characteristics</h3>
+                    <div class="section-content">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin: 20px 0;">
+                            <div style="padding: 15px; background: rgba(15, 240, 252, 0.1); border-radius: 8px;">
+                                <p style="color: var(--neon-blue); font-weight: 600;">Uniqueness</p>
+                                <p style="font-size: 0.9rem; color: var(--text-dim);">Primary key must be unique, secondary key may have duplicates</p>
+                            </div>
+                            
+                            <div style="padding: 15px; background: rgba(0, 255, 157, 0.1); border-radius: 8px;">
+                                <p style="color: var(--neon-green); font-weight: 600;">Data Content</p>
+                                <p style="font-size: 0.9rem; color: var(--text-dim);">Both contain actual data values (not just pointers)</p>
+                            </div>
+                            
+                            <div style="padding: 15px; background: rgba(255, 0, 255, 0.1); border-radius: 8px;">
+                                <p style="color: var(--neon-pink); font-weight: 600;">Canonical Form</p>
+                                <p style="font-size: 0.9rem; color: var(--text-dim);">Standardized representation for consistent comparison</p>
+                            </div>
+                            
+                            <div style="padding: 15px; background: rgba(185, 103, 255, 0.1); border-radius: 8px;">
+                                <p style="color: var(--neon-purple); font-weight: 600;">Search Purpose</p>
+                                <p style="font-size: 0.9rem; color: var(--text-dim);">Primary: exact retrieval; Secondary: categorization/filtering</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sequential Search -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-list-ol"></i> Sequential Search</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-search"></i> How Sequential Search Works</h3>
+                    <div class="section-content">
+                        <p>Search for a record matching a given key by looking at records sequentially until 
+                        the matching record is found.</p>
+                        
+                        <div class="search-viz">
+                            <p style="color: var(--neon-green); margin-bottom: 15px; font-weight: 600;">Searching for Record ID: R005</p>
+                            
+                            <div class="record-line">
+                                <div class="record-box searched">
+                                    <div class="record-id">R001</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-dim);">Not matched</div>
+                                </div>
+                                <div class="record-box searched">
+                                    <div class="record-id">R002</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-dim);">Not matched</div>
+                                </div>
+                                <div class="record-box searched">
+                                    <div class="record-id">R003</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-dim);">Not matched</div>
+                                </div>
+                                <div class="record-box searched">
+                                    <div class="record-id">R004</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-dim);">Not matched</div>
+                                </div>
+                                <div class="record-box found">
+                                    <div class="record-id">R005</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-dim);">FOUND!</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-chart-line"></i> Performance Characteristics</h3>
+                    <div class="section-content">
+                        <div class="complexity-box">
+                            <div class="complexity-item">
+                                <div class="complexity-title">Time Complexity</div>
+                                <div style="color: var(--neon-blue); font-size: 1.5rem; font-weight: 700;">O(n)</div>
+                                <div style="color: var(--text-dim); font-size: 0.9rem;">Linear time</div>
+                            </div>
+                            
+                            <div class="complexity-item">
+                                <div class="complexity-title">Best Case</div>
+                                <div style="color: var(--neon-green); font-size: 1.5rem; font-weight: 700;">1</div>
+                                <div style="color: var(--text-dim); font-size: 0.9rem;">First record matches</div>
+                            </div>
+                            
+                            <div class="complexity-item">
+                                <div class="complexity-title">Average Case</div>
+                                <div style="color: var(--neon-yellow); font-size: 1.5rem; font-weight: 700;">n/2</div>
+                                <div style="color: var(--text-dim); font-size: 0.9rem;">Half the records checked</div>
+                            </div>
+                            
+                            <div class="complexity-item">
+                                <div class="complexity-title">Worst Case</div>
+                                <div style="color: var(--neon-pink); font-size: 1.5rem; font-weight: 700;">n</div>
+                                <div style="color: var(--text-dim); font-size: 0.9rem;">All records checked</div>
+                            </div>
+                        </div>
+                        
+                        <p><strong>The work required</strong> to search sequentially for a record in a file with 
+                        n records is proportional to n.</p>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-tachometer-alt"></i> Performance Improvement</h3>
+                    <div class="section-content">
+                        <p><strong>Record Blocking:</strong> Improve performance by reading in a block of several 
+                        records all at once and then processing that block of records in memory.</p>
+                        
+                        <div class="performance-grid">
+                            <div class="perf-card">
+                                <div class="perf-title">Without Blocking</div>
+                                <div style="color: var(--text-dim);">Many small disk reads</div>
+                                <div style="color: #ff5555; margin-top: 10px; font-weight: 600;">Slow</div>
+                            </div>
+                            
+                            <div class="perf-card">
+                                <div class="perf-title">With Blocking</div>
+                                <div style="color: var(--text-dim);">Fewer larger disk reads</div>
+                                <div style="color: var(--neon-green); margin-top: 10px; font-weight: 600;">Faster</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-check-circle"></i> When to Use Sequential Search</h3>
+                    <div class="section-content">
+                        <ul class="key-points">
+                            <li><strong>ASCII files</strong> where you're searching for some pattern</li>
+                            <li><strong>Files with few records</strong> (e.g., 10 records)</li>
+                            <li><strong>Files that hardly ever need to be searched</strong> (e.g., tape files)</li>
+                            <li><strong>Files where you want all records with a certain secondary key value</strong>, 
+                            where a large number of matches is expected</li>
+                            <li>When the file is not sorted by the search key</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Direct Access -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-bullseye"></i> Direct Access</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-crosshairs"></i> How Direct Access Works</h3>
+                    <div class="section-content">
+                        <p>Being able to seek directly to the beginning of a record using its 
+                        <strong>Relative Record Number (RRN)</strong>.</p>
+                        
+                        <div class="direct-access-viz">
+                            <div class="index-file">
+                                <div class="index-entry">
+                                    <div style="color: var(--neon-blue); font-weight: 600;">RRN</div>
+                                    <div style="color: var(--text-dim); font-size: 0.9rem;">0</div>
+                                </div>
+                                <div class="index-entry">
+                                    <div style="color: var(--neon-blue); font-weight: 600;">Byte Offset</div>
+                                    <div style="color: var(--text-dim); font-size: 0.9rem;">00</div>
+                                </div>
+                                <div class="index-entry">
+                                    <div style="color: var(--neon-blue); font-weight: 600;">RRN</div>
+                                    <div style="color: var(--text-dim); font-size: 0.9rem;">1</div>
+                                </div>
+                                <div class="index-entry">
+                                    <div style="color: var(--neon-blue); font-weight: 600;">Byte Offset</div>
+                                    <div style="color: var(--text-dim); font-size: 0.9rem;">47</div>
+                                </div>
+                                <div class="index-entry">
+                                    <div style="color: var(--neon-blue); font-weight: 600;">RRN</div>
+                                    <div style="color: var(--text-dim); font-size: 0.9rem;">2</div>
+                                </div>
+                                <div class="index-entry">
+                                    <div style="color: var(--neon-blue); font-weight: 600;">Byte Offset</div>
+                                    <div style="color: var(--text-dim); font-size: 0.9rem;">103</div>
+                                </div>
+                            </div>
+                            
+                            <div class="data-file">
+                                1202345|Ahmed|Hassan|1 Safa street|Cairo|Egypt|2349890|Mona|Hussein|42 El Thawra street|Ismailia|Egypt|1210322|Tamer|Fouad|123 Ramsis street|Cairo|Egypt|
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-calculator"></i> Byte Offset Calculation</h3>
+                    <div class="section-content">
+                        <div style="background: rgba(15, 240, 252, 0.1); padding: 20px; border-radius: 8px; margin: 15px 0;">
+                            <p style="color: var(--neon-blue); font-weight: 600; margin-bottom: 10px;">Formula:</p>
+                            <p style="color: var(--text-dim); font-family: monospace; font-size: 1.1rem;">
+                                Byte Offset = RRN × Record Length
+                            </p>
+                        </div>
+                        
+                        <div style="background: rgba(255, 0, 255, 0.1); padding: 20px; border-radius: 8px; margin: 15px 0;">
+                            <p style="color: var(--neon-pink); font-weight: 600; margin-bottom: 10px;">Example:</p>
+                            <p style="color: var(--text-dim);">
+                                RRN = 30 (31st record)<br>
+                                Record length = 101 bytes<br>
+                                <span style="color: var(--neon-green); font-weight: 600;">Byte offset = 30 × 101 = 3030</span>
+                            </p>
+                        </div>
+                        
+                        <p>Once the byte offset is calculated, the system uses the <strong>seek</strong> operation 
+                        to go directly to that position in the file.</p>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-bolt"></i> Performance Characteristics</h3>
+                    <div class="section-content">
+                        <div class="complexity-box" style="flex-direction: column; text-align: center;">
+                            <div style="color: var(--neon-green); font-size: 2rem; font-weight: 700;">O(1)</div>
+                            <div style="color: var(--text-dim);">Constant time access</div>
+                            <div style="margin-top: 15px; color: var(--neon-blue);">
+                                Direct access is possible when we know the Relative Record Number (RRN)
+                            </div>
+                        </div>
+                        
+                        <p><strong>Requirements for Direct Access:</strong></p>
+                        <ul class="key-points">
+                            <li>Records must be fixed length</li>
+                            <li>Must know the RRN of the desired record</li>
+                            <li>First record has RRN 0, next has RRN 1, etc.</li>
+                            <li>Requires an index file or calculation mechanism</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header Records -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-file-alt"></i> Header Records</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-info-circle"></i> What is a Header Record?</h3>
+                    <div class="section-content">
+                        <p>A <strong>header record</strong> is placed at the beginning of a file and is used to 
+                        store information about the file contents and the file organization.</p>
+                        
+                        <div class="header-viz">
+                            <div class="header-field">
+                                <span class="field-label">Record Length</span>
+                                <span style="color: var(--text-dim);">Length of data records in bytes</span>
+                            </div>
+                            <div class="header-field">
+                                <span class="field-label">Last Update</span>
+                                <span style="color: var(--text-dim);">Date and time of most recent file update</span>
+                            </div>
+                            <div class="header-field">
+                                <span class="field-label">File Name</span>
+                                <span style="color: var(--text-dim);">Name of the file for identification</span>
+                            </div>
+                            <div class="header-field">
+                                <span class="field-label">Organization Type</span>
+                                <span style="color: var(--text-dim);">Sequential, indexed, direct, etc.</span>
+                            </div>
+                            <div class="header-field">
+                                <span class="field-label">Record Count</span>
+                                <span style="color: var(--text-dim);">Number of records in the file</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-cogs"></i> Header Record Characteristics</h3>
+                    <div class="section-content">
+                        <ul class="key-points">
+                            <li>Placed at the <strong>beginning</strong> of the file (position 0)</li>
+                            <li>Usually has a <strong>different structure and size</strong> than data records</li>
+                            <li>Contains <strong>metadata</strong> about the file</li>
+                            <li>Read first when opening a file</li>
+                            <li>Updated when file contents change</li>
+                            <li>Essential for file management and organization</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-list"></i> Common Header Information</h3>
+                    <div class="section-content">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
+                            <div style="padding: 15px; background: rgba(15, 240, 252, 0.1); border-radius: 6px;">
+                                <p style="color: var(--neon-blue); font-weight: 600; font-size: 0.9rem;">Length of data records</p>
+                            </div>
+                            <div style="padding: 15px; background: rgba(0, 255, 157, 0.1); border-radius: 6px;">
+                                <p style="color: var(--neon-green); font-weight: 600; font-size: 0.9rem;">Date/time of last update</p>
+                            </div>
+                            <div style="padding: 15px; background: rgba(255, 0, 255, 0.1); border-radius: 6px;">
+                                <p style="color: var(--neon-pink); font-weight: 600; font-size: 0.9rem;">File name</p>
+                            </div>
+                            <div style="padding: 15px; background: rgba(185, 103, 255, 0.1); border-radius: 6px;">
+                                <p style="color: var(--neon-purple); font-weight: 600; font-size: 0.9rem;">File organization type</p>
+                            </div>
+                            <div style="padding: 15px; background: rgba(255, 235, 59, 0.1); border-radius: 6px;">
+                                <p style="color: var(--neon-yellow); font-weight: 600; font-size: 0.9rem;">Record count</p>
+                            </div>
+                            <div style="padding: 15px; background: rgba(255, 165, 0, 0.1); border-radius: 6px;">
+                                <p style="color: #ffa500; font-weight: 600; font-size: 0.9rem;">Key field information</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Method Comparison -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-balance-scale"></i> Search Method Comparison</h2>
+                
+                <div class="content-section">
+                    <div class="section-content">
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                                <thead>
+                                    <tr style="background: rgba(15, 240, 252, 0.2);">
+                                        <th style="padding: 12px; text-align: left; color: var(--neon-blue);">Aspect</th>
+                                        <th style="padding: 12px; text-align: left; color: var(--neon-blue);">Sequential Search</th>
+                                        <th style="padding: 12px; text-align: left; color: var(--neon-blue);">Direct Access</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <td style="padding: 12px; color: var(--text-dim);"><strong>Time Complexity</strong></td>
+                                        <td style="padding: 12px; color: var(--text-dim);">O(n) - Linear</td>
+                                        <td style="padding: 12px; color: var(--text-dim);">O(1) - Constant</td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <td style="padding: 12px; color: var(--text-dim);"><strong>Best Case</strong></td>
+                                        <td style="padding: 12px; color: var(--text-dim);">1 comparison</td>
+                                        <td style="padding: 12px; color: var(--text-dim);">1 seek operation</td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <td style="padding: 12px; color: var(--text-dim);"><strong>Worst Case</strong></td>
+                                        <td style="padding: 12px; color: var(--text-dim);">n comparisons</td>
+                                        <td style="padding: 12px; color: var(--text-dim);">1 seek operation</td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <td style="padding: 12px; color: var(--text-dim);"><strong>Record Requirements</strong></td>
+                                        <td style="padding: 12px; color: var(--text-dim);">Any length (fixed or variable)</td>
+                                        <td style="padding: 12px; color: var(--text-dim);">Fixed length only</td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <td style="padding: 12px; color: var(--text-dim);"><strong>Requirement</strong></td>
+                                        <td style="padding: 12px; color: var(--text-dim);">Search key value</td>
+                                        <td style="padding: 12px; color: var(--text-dim);">Relative Record Number (RRN)</td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <td style="padding: 12px; color: var(--text-dim);"><strong>File Organization</strong></td>
+                                        <td style="padding: 12px; color: var(--text-dim);">Any organization</td>
+                                        <td style="padding: 12px; color: var(--text-dim);">Requires index or calculation</td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <td style="padding: 12px; color: var(--text-dim);"><strong>Best For</strong></td>
+                                        <td style="padding: 12px; color: var(--text-dim);">Small files, infrequent searches, pattern matching</td>
+                                        <td style="padding: 12px; color: var(--text-dim);">Large files, frequent access, known positions</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exam Focus Section -->
+            <div class="exam-focus">
+                <h2 class="exam-title"><i class="fas fa-star"></i> Exam Focus Points</h2>
+                <div class="exam-points">
+                    <div class="exam-point">
+                        <h4>Primary vs Secondary Keys</h4>
+                        <p>Understand differences and use cases for each</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Sequential Search</h4>
+                        <p>Time complexity, best/worst cases, when to use</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Direct Access</h4>
+                        <p>RRN, byte offset calculation, O(1) time complexity</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Header Records</h4>
+                        <p>Purpose, content, and placement in files</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Record Blocking</h4>
+                        <p>How it improves sequential search performance</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Search Method Selection</h4>
+                        <p>When to use sequential vs direct access</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Byte Offset Calculation</h4>
+                        <p>RRN × Record Length formula application</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Key Characteristics</h4>
+                        <p>Canonical form, uniqueness, data content</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Takeaways -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-lightbulb"></i> Key Takeaways</h2>
+                <div class="content-section">
+                    <ul class="key-points">
+                        <li>Primary keys uniquely identify records while secondary keys enable searching and categorization</li>
+                        <li>Sequential search has O(n) time complexity and is suitable for small files or infrequent searches</li>
+                        <li>Direct access provides O(1) constant time access but requires fixed-length records and known RRN</li>
+                        <li>Record blocking improves sequential search performance by reducing disk I/O operations</li>
+                        <li>Header records store metadata about files and are essential for proper file management</li>
+                        <li>Byte offset for direct access is calculated as: RRN × Record Length</li>
+                        <li>Choosing between sequential and direct access depends on file size, access frequency, and record organization</li>
+                        <li>Both primary and secondary keys have canonical forms and contain actual data values</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="index.html" class="action-btn btn-main">
+                    <i class="fas fa-home"></i> Back to Main Page
+                </a>
+                <a href="File organization the sixth lecture (6).pdf" class="action-btn btn-download" download>
+                    <i class="fas fa-download"></i> Download Chapter PDF
+                </a>
+            </div>
+        </main>
+
+        <footer>
+            <p>Chapter 6 Summary &copy; 2023 | Created by <span class="footer-highlight">Debuggers' Den Team</span></p>
+            <p style="margin-top: 10px;">This summary covers <span class="footer-highlight">all key points</span> from Chapter 6 for comprehensive exam preparation</p>
+        </footer>
+    </div>
+
+    <script>
+        // Add hover effects to content sections
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(5px)';
+            });
+            
+            section.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+
+        // Add animation to record boxes in search visualization
+        const recordBoxes = document.querySelectorAll('.record-box');
+        recordBoxes.forEach((box, index) => {
+            if (box.classList.contains('searched')) {
+                box.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.05)';
+                    this.style.boxShadow = '0 0 15px rgba(255, 0, 255, 0.3)';
+                });
+                
+                box.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                    this.style.boxShadow = 'none';
+                });
+            }
+            
+            if (box.classList.contains('found')) {
+                box.addEventListener('mouseenter', function() {
+                    this.style.animation = 'pulse 1s infinite';
+                });
+                
+                box.addEventListener('mouseleave', function() {
+                    this.style.animation = 'none';
+                });
+            }
+        });
+
+        // Add animation to key cards
+        document.querySelectorAll('.key-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.3)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = 'none';
+            });
+        });
+
+        // Add animation to performance cards
+        document.querySelectorAll('.perf-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Add click animation to action buttons
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+                
+                // If download button, show loading state
+                if (this.classList.contains('btn-download')) {
+                    const icon = this.querySelector('i');
+                    const originalClass = icon.className;
+                    icon.className = 'fas fa-spinner fa-spin';
+                    
+                    setTimeout(() => {
+                        icon.className = originalClass;
+                    }, 1000);
+                }
+            });
+        });
+
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate sections on load
+            const sections = document.querySelectorAll('.content-section, .glass-panel');
+            sections.forEach((section, index) => {
+                section.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+</body>
+</html>

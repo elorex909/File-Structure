@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 1: Introduction to File Structures | File Organization Master</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --neon-blue: #0ff0fc;
+            --neon-pink: #ff00ff;
+            --neon-green: #00ff9d;
+            --neon-purple: #b967ff;
+            --neon-yellow: #ffeb3b;
+            --dark-bg: #0a0a0f;
+            --dark-surface: rgba(15, 15, 25, 0.85);
+            --text-light: #f0f0f0;
+            --text-dim: #b0b0c0;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(100, 0, 255, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 200, 0.05) 0%, transparent 20%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        header {
+            margin-bottom: 40px;
+            padding-top: 20px;
+            position: relative;
+        }
+
+        .back-nav {
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(15, 240, 252, 0.1);
+            color: var(--neon-blue);
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid rgba(15, 240, 252, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(15, 240, 252, 0.2);
+            box-shadow: 0 0 15px rgba(15, 240, 252, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .chapter-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .chapter-number {
+            font-size: 5rem;
+            font-weight: 800;
+            color: rgba(15, 240, 252, 0.2);
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .chapter-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(15, 240, 252, 0.3);
+        }
+
+        .chapter-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Glass Panel */
+        .glass-panel {
+            background: var(--dark-surface);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .glass-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba(15, 240, 252, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-title {
+            font-size: 1.8rem;
+            color: var(--neon-green);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid rgba(0, 255, 157, 0.2);
+            padding-bottom: 10px;
+        }
+
+        .panel-title i {
+            font-size: 1.5rem;
+        }
+
+        /* Content Sections */
+        .content-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--neon-blue);
+            transition: all 0.3s ease;
+        }
+
+        .content-section:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-left-color: var(--neon-pink);
+            transform: translateX(5px);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: var(--neon-blue);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--neon-pink);
+        }
+
+        .section-content {
+            color: var(--text-dim);
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .key-points {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 10px 0 10px 30px;
+            color: var(--text-dim);
+            position: relative;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .key-points li:last-child {
+            border-bottom: none;
+        }
+
+        .key-points li:before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            color: var(--neon-green);
+            font-size: 0.8rem;
+        }
+
+        .highlight {
+            background: rgba(15, 240, 252, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 3px solid var(--neon-blue);
+        }
+
+        .highlight-title {
+            color: var(--neon-blue);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        /* DIKW Pyramid */
+        .dikw-pyramid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        .dikw-level {
+            width: 80%;
+            padding: 20px;
+            text-align: center;
+            margin: 5px 0;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .dikw-level:hover {
+            transform: scale(1.02);
+        }
+
+        .level-wisdom {
+            background: linear-gradient(to right, rgba(185, 103, 255, 0.2), rgba(185, 103, 255, 0.1));
+            border: 1px solid rgba(185, 103, 255, 0.3);
+            color: var(--neon-purple);
+        }
+
+        .level-knowledge {
+            background: linear-gradient(to right, rgba(0, 255, 157, 0.2), rgba(0, 255, 157, 0.1));
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            color: var(--neon-green);
+            width: 85%;
+        }
+
+        .level-information {
+            background: linear-gradient(to right, rgba(255, 0, 255, 0.2), rgba(255, 0, 255, 0.1));
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            color: var(--neon-pink);
+            width: 90%;
+        }
+
+        .level-data {
+            background: linear-gradient(to right, rgba(15, 240, 252, 0.2), rgba(15, 240, 252, 0.1));
+            border: 1px solid rgba(15, 240, 252, 0.3);
+            color: var(--neon-blue);
+            width: 95%;
+        }
+
+        .level-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .level-desc {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        /* Exam Focus Box */
+        .exam-focus {
+            background: rgba(255, 235, 59, 0.1);
+            border: 1px solid rgba(255, 235, 59, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exam-focus:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 235, 59, 0.05), transparent);
+        }
+
+        .exam-title {
+            color: var(--neon-yellow);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .exam-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .exam-point {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--neon-yellow);
+        }
+
+        /* Project Table */
+        .project-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .project-table th {
+            background: rgba(15, 240, 252, 0.2);
+            color: var(--neon-blue);
+            padding: 15px;
+            text-align: left;
+            border-bottom: 2px solid rgba(15, 240, 252, 0.3);
+        }
+
+        .project-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-dim);
+        }
+
+        .project-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .btn-main {
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            color: white;
+            border: none;
+        }
+
+        .btn-download {
+            background: rgba(255, 0, 255, 0.1);
+            color: var(--neon-pink);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-main:hover {
+            background: linear-gradient(to right, var(--neon-pink), var(--neon-blue));
+        }
+
+        .btn-download:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .footer-highlight {
+            color: var(--neon-green);
+            font-weight: 600;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .chapter-number {
+                font-size: 4rem;
+            }
+            
+            .chapter-title {
+                font-size: 2rem;
+            }
+            
+            .glass-panel {
+                padding: 20px;
+            }
+            
+            .exam-points {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .dikw-level {
+                width: 95%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .chapter-number {
+                font-size: 3rem;
+            }
+            
+            .chapter-title {
+                font-size: 1.8rem;
+            }
+            
+            .panel-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Back Navigation -->
+        <header>
+            <div class="back-nav">
+                <a href="index.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Main Page
+                </a>
+            </div>
+            
+            <div class="chapter-header">
+                <div class="chapter-number">01</div>
+                <h1 class="chapter-title">Introduction to File Structures</h1>
+                <p class="chapter-subtitle">Understanding DIKW Model, File Organization Fundamentals, and Course Overview</p>
+            </div>
+        </header>
+
+        <main>
+            <!-- Course Overview -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-graduation-cap"></i> Chapter Overview</h2>
+                <div class="content-section">
+                    <p class="section-content">
+                        This chapter introduces the fundamental concepts of file organization, starting with the DIKW model 
+                        that explains the hierarchy of data processing. It covers the basic definitions, importance of file 
+                        structures, and provides an overview of the entire course syllabus including suggested project proposals.
+                    </p>
+                </div>
+            </div>
+
+            <!-- DIKW Model Section -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-layer-group"></i> The DIKW Model</h2>
+                
+                <div class="dikw-pyramid">
+                    <div class="dikw-level level-wisdom">
+                        <div class="level-title">Wisdom</div>
+                        <div class="level-desc">Strategic judgment based on knowledge and context</div>
+                    </div>
+                    <div class="dikw-level level-knowledge">
+                        <div class="level-title">Knowledge</div>
+                        <div class="level-desc">Rules, relationships and models derived from information</div>
+                    </div>
+                    <div class="dikw-level level-information">
+                        <div class="level-title">Information</div>
+                        <div class="level-desc">Data processed to provide meaning and context</div>
+                    </div>
+                    <div class="dikw-level level-data">
+                        <div class="level-title">Data</div>
+                        <div class="level-desc">Raw facts and observations without context</div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-info-circle"></i> DIKW Hierarchy Explanation</h3>
+                    <div class="section-content">
+                        <p>The DIKW pyramid represents the transformation process from raw data to strategic wisdom:</p>
+                        <ul class="key-points">
+                            <li><strong>Data:</strong> Unprocessed facts and observations (e.g., sensor readings, transaction logs)</li>
+                            <li><strong>Information:</strong> Processed data with meaning (e.g., monthly sales report)</li>
+                            <li><strong>Knowledge:</strong> Applied information with rules and logic (e.g., business rules, ML models)</li>
+                            <li><strong>Wisdom:</strong> Strategic judgment using knowledge (e.g., choosing system architecture)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Structures Fundamentals -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-folder-open"></i> File Structures Fundamentals</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-file"></i> What is a File?</h3>
+                    <div class="section-content">
+                        <p>A file is a collection of data that has logical connection. In file organization, we focus on:</p>
+                        <ul class="key-points">
+                            <li>Concentrating at the file level</li>
+                            <li>Interest in a single file at a time</li>
+                            <li>Collection of logically related records</li>
+                            <li>Focus on how data within files is structured, stored, and accessed efficiently</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-database"></i> Files vs Data</h3>
+                    <div class="section-content">
+                        <div class="highlight">
+                            <div class="highlight-title">Key Distinction:</div>
+                            <p><strong>Files</strong> are named, persistent collections of data stored on storage devices. <strong>Data</strong> is the actual information itself, which can be structured or unstructured.</p>
+                        </div>
+                        <p>Files organize and manage data, making it accessible and useful for users and programs.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Course Syllabus -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-list-alt"></i> File Organization Syllabus</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-book"></i> Course Structure Overview</h3>
+                    <div class="section-content">
+                        <p>The course is divided into four main sections covering all aspects of file organization:</p>
+                        
+                        <div class="highlight">
+                            <div class="highlight-title">Section 1: Motivation for File Organization</div>
+                            <ul class="key-points">
+                                <li>Introduction to data, information, and knowledge</li>
+                                <li>Data units hierarchy</li>
+                                <li>The stream model</li>
+                                <li>Internal vs external memory</li>
+                            </ul>
+                        </div>
+
+                        <div class="highlight">
+                            <div class="highlight-title">Section 2: Hardware and Its Parameters</div>
+                            <ul class="key-points">
+                                <li>Internal memory technologies</li>
+                                <li>External storage technologies</li>
+                                <li>Device interfaces and management</li>
+                                <li>Disk parameters, blocking, buffering, and data transfer rates</li>
+                            </ul>
+                        </div>
+
+                        <div class="highlight">
+                            <div class="highlight-title">Section 3: Fundamental File Organizations</div>
+                            <ul class="key-points">
+                                <li>File performance measures</li>
+                                <li>Basic, higher-level, and hybrid file organizations</li>
+                            </ul>
+                        </div>
+
+                        <div class="highlight">
+                            <div class="highlight-title">Section 4: Basic File Organizations (Detailed)</div>
+                            <ul class="key-points">
+                                <li>Pile file organization</li>
+                                <li>Sequential files</li>
+                                <li>Indexed-sequential files</li>
+                                <li>Direct (access) files</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project Proposals -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-project-diagram"></i> Suggested Project Proposals</h2>
+                
+                <table class="project-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Project Title</th>
+                            <th>Description</th>
+                            <th>Tool / Program</th>
+                            <th>Performance Metric</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>File Organization Simulation</td>
+                            <td>Develop program to simulate data storage and retrieval using different file organizations</td>
+                            <td>Python / Java</td>
+                            <td>Access Time, Memory Usage</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Mini File System Design</td>
+                            <td>Build prototype file system supporting file creation, storage, and searching</td>
+                            <td>C / C++ on Linux</td>
+                            <td>File Search Time, Insert Time</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Data Structure Comparison for Indexing</td>
+                            <td>Compare performance of B-Trees, Hash Tables, and Linked Lists in operations</td>
+                            <td>Python (with timeit library)</td>
+                            <td>Time Complexity in Practice</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>DIKW Model Practical Application</td>
+                            <td>Convert raw data into Information → Knowledge → Wisdom using processing</td>
+                            <td>Excel / Power BI / Python (Pandas)</td>
+                            <td>Transformation Speed, Visualization Accuracy</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Exam Focus Section -->
+            <div class="exam-focus">
+                <h2 class="exam-title"><i class="fas fa-star"></i> Exam Focus Points</h2>
+                <div class="exam-points">
+                    <div class="exam-point">
+                        <h4>DIKW Model</h4>
+                        <p>Understand each level: Data → Information → Knowledge → Wisdom with examples</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>File Definition</h4>
+                        <p>Know what constitutes a file and how it differs from raw data</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Course Structure</h4>
+                        <p>Be familiar with the four main sections of the syllabus</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Project Applications</h4>
+                        <p>Understand practical applications through suggested projects</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Hierarchy Concepts</h4>
+                        <p>Data units hierarchy and the stream model importance</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Memory Types</h4>
+                        <p>Difference between internal and external memory</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Takeaways -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-lightbulb"></i> Key Takeaways</h2>
+                <div class="content-section">
+                    <ul class="key-points">
+                        <li>The DIKW model provides a framework for understanding data transformation from raw facts to strategic wisdom</li>
+                        <li>Files are organized collections of data that make information accessible and manageable</li>
+                        <li>File organization focuses on efficient structuring, storage, and access of data within files</li>
+                        <li>The course covers both theoretical concepts and practical applications through projects</li>
+                        <li>Understanding the hierarchy from data to wisdom is crucial for effective information management</li>
+                        <li>Project proposals provide hands-on experience with different file organization techniques</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="index.html" class="action-btn btn-main">
+                    <i class="fas fa-home"></i> Back to Main Page
+                </a>
+                <a href="File organization the  First lecture.pdf" class="action-btn btn-download" download>
+                    <i class="fas fa-download"></i> Download Chapter PDF
+                </a>
+            </div>
+        </main>
+
+        <footer>
+            <p>Chapter 1 Summary &copy; 2023 | Created by <span class="footer-highlight">Debuggers' Den Team</span></p>
+            <p style="margin-top: 10px;">This summary covers <span class="footer-highlight">all key points</span> from Chapter 1 for comprehensive exam preparation</p>
+        </footer>
+    </div>
+
+    <script>
+        // Add hover effects to content sections
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(5px)';
+            });
+            
+            section.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+
+        // Add animation to DIKW levels on hover
+        document.querySelectorAll('.dikw-level').forEach(level => {
+            level.addEventListener('mouseenter', function() {
+                const allLevels = document.querySelectorAll('.dikw-level');
+                allLevels.forEach(l => {
+                    if (l !== this) {
+                        l.style.opacity = '0.7';
+                        l.style.transform = 'scale(0.98)';
+                    }
+                });
+            });
+            
+            level.addEventListener('mouseleave', function() {
+                const allLevels = document.querySelectorAll('.dikw-level');
+                allLevels.forEach(l => {
+                    l.style.opacity = '1';
+                    l.style.transform = 'scale(1)';
+                });
+            });
+        });
+
+        // Add click animation to action buttons
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+                
+                // If download button, show loading state
+                if (this.classList.contains('btn-download')) {
+                    const icon = this.querySelector('i');
+                    const originalClass = icon.className;
+                    icon.className = 'fas fa-spinner fa-spin';
+                    
+                    setTimeout(() => {
+                        icon.className = originalClass;
+                    }, 1000);
+                }
+            });
+        });
+
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate sections on load
+            const sections = document.querySelectorAll('.content-section, .glass-panel');
+            sections.forEach((section, index) => {
+                section.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+</body>
+</html>

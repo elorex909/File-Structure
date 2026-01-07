@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 3: Magnetic Storage Technology | File Organization Master</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --neon-blue: #0ff0fc;
+            --neon-pink: #ff00ff;
+            --neon-green: #00ff9d;
+            --neon-purple: #b967ff;
+            --neon-yellow: #ffeb3b;
+            --dark-bg: #0a0a0f;
+            --dark-surface: rgba(15, 15, 25, 0.85);
+            --text-light: #f0f0f0;
+            --text-dim: #b0b0c0;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(100, 0, 255, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 200, 0.05) 0%, transparent 20%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        header {
+            margin-bottom: 40px;
+            padding-top: 20px;
+            position: relative;
+        }
+
+        .back-nav {
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(15, 240, 252, 0.1);
+            color: var(--neon-blue);
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid rgba(15, 240, 252, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(15, 240, 252, 0.2);
+            box-shadow: 0 0 15px rgba(15, 240, 252, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .chapter-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .chapter-number {
+            font-size: 5rem;
+            font-weight: 800;
+            color: rgba(15, 240, 252, 0.2);
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .chapter-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(15, 240, 252, 0.3);
+        }
+
+        .chapter-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Glass Panel */
+        .glass-panel {
+            background: var(--dark-surface);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .glass-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba(15, 240, 252, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-title {
+            font-size: 1.8rem;
+            color: var(--neon-green);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid rgba(0, 255, 157, 0.2);
+            padding-bottom: 10px;
+        }
+
+        .panel-title i {
+            font-size: 1.5rem;
+        }
+
+        /* Content Sections */
+        .content-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--neon-blue);
+            transition: all 0.3s ease;
+        }
+
+        .content-section:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: var(--neon-blue);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--neon-pink);
+        }
+
+        .section-content {
+            color: var(--text-dim);
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .key-points {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 10px 0 10px 30px;
+            color: var(--text-dim);
+            position: relative;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .key-points li:last-child {
+            border-bottom: none;
+        }
+
+        .key-points li:before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            color: var(--neon-green);
+            font-size: 0.8rem;
+        }
+
+        /* Storage Technology Cards */
+        .tech-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .tech-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 12px;
+            border-top: 4px solid var(--neon-blue);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tech-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .tech-card.magnetic {
+            border-top-color: var(--neon-blue);
+        }
+
+        .tech-card.optical {
+            border-top-color: var(--neon-pink);
+        }
+
+        .tech-card.solid-state {
+            border-top-color: var(--neon-green);
+        }
+
+        .tech-title {
+            font-size: 1.3rem;
+            color: var(--neon-blue);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .tech-card.magnetic .tech-title {
+            color: var(--neon-blue);
+        }
+
+        .tech-card.optical .tech-title {
+            color: var(--neon-pink);
+        }
+
+        .tech-card.solid-state .tech-title {
+            color: var(--neon-green);
+        }
+
+        /* Hard Disk Components */
+        .components-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .component-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .component-card:hover {
+            border-color: var(--neon-purple);
+            transform: translateY(-3px);
+        }
+
+        .component-name {
+            color: var(--neon-purple);
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        /* Disk Visualization */
+        .disk-visualization {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .disk-layer {
+            width: 80%;
+            height: 60px;
+            background: linear-gradient(to right, rgba(15, 240, 252, 0.1), rgba(255, 0, 255, 0.1));
+            margin: 5px 0;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .disk-label {
+            color: var(--neon-blue);
+            font-weight: 600;
+            z-index: 2;
+        }
+
+        /* Calculation Examples */
+        .calculation-box {
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+
+        .calc-step {
+            margin: 10px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .calc-step:before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--neon-green);
+        }
+
+        /* Disk Access Cost Visualization */
+        .access-cost {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .cost-item {
+            flex: 1;
+            min-width: 200px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            text-align: center;
+            border-top: 3px solid var(--neon-yellow);
+        }
+
+        .cost-name {
+            color: var(--neon-yellow);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        /* Exam Focus Box */
+        .exam-focus {
+            background: rgba(255, 235, 59, 0.1);
+            border: 1px solid rgba(255, 235, 59, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exam-focus:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 235, 59, 0.05), transparent);
+        }
+
+        .exam-title {
+            color: var(--neon-yellow);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .exam-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .exam-point {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--neon-yellow);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .btn-main {
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            color: white;
+            border: none;
+        }
+
+        .btn-download {
+            background: rgba(255, 0, 255, 0.1);
+            color: var(--neon-pink);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-main:hover {
+            background: linear-gradient(to right, var(--neon-pink), var(--neon-blue));
+        }
+
+        .btn-download:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .footer-highlight {
+            color: var(--neon-green);
+            font-weight: 600;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .chapter-number {
+                font-size: 4rem;
+            }
+            
+            .chapter-title {
+                font-size: 2rem;
+            }
+            
+            .glass-panel {
+                padding: 20px;
+            }
+            
+            .tech-cards,
+            .exam-points {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .components-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .access-cost {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .chapter-number {
+                font-size: 3rem;
+            }
+            
+            .chapter-title {
+                font-size: 1.8rem;
+            }
+            
+            .panel-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Back Navigation -->
+        <header>
+            <div class="back-nav">
+                <a href="index.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Main Page
+                </a>
+            </div>
+            
+            <div class="chapter-header">
+                <div class="chapter-number">03</div>
+                <h1 class="chapter-title">Magnetic Storage Technology</h1>
+                <p class="chapter-subtitle">Understanding Hard Disks, Storage Basics, Disk Architecture, and Magnetic Storage Systems</p>
+            </div>
+        </header>
+
+        <main>
+            <!-- Chapter Overview -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-graduation-cap"></i> Chapter Overview</h2>
+                <div class="content-section">
+                    <p class="section-content">
+                        This chapter explores magnetic storage technology, focusing on hard disk drives, their components, 
+                        data organization, capacity calculations, and access mechanisms. It also covers tape storage and 
+                        the importance of understanding secondary storage for efficient file system design.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Storage Technologies Overview -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-hdd"></i> Storage Technologies Overview</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-server"></i> Secondary Storage Importance</h3>
+                    <div class="section-content">
+                        <p>Secondary storage is different from main memory (RAM) and understanding it is crucial for 
+                        designing good file systems:</p>
+                        <ul class="key-points">
+                            <li><strong>RAM</strong> is fast but temporary (data lost when power off)</li>
+                            <li><strong>Secondary storage</strong> keeps data permanently</li>
+                            <li>To design efficient file systems, we must understand how secondary storage works</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="tech-cards">
+                    <div class="tech-card magnetic">
+                        <div class="tech-title">Magnetic Storage</div>
+                        <p>Stores data by magnetizing microscopic particles on disk/tape surfaces</p>
+                        <ul style="padding-left: 20px; margin-top: 10px; color: var(--text-dim);">
+                            <li>Hard Disks (HDD)</li>
+                            <li>Magnetic Tapes</li>
+                            <li>Floppy Disks (obsolete)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tech-card optical">
+                        <div class="tech-title">Optical Storage</div>
+                        <p>Uses laser light to read/write data on reflective surfaces</p>
+                        <ul style="padding-left: 20px; margin-top: 10px; color: var(--text-dim);">
+                            <li>CD-ROM, DVD-ROM</li>
+                            <li>Blu-ray</li>
+                            <li>Read-only/write-once</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tech-card solid-state">
+                        <div class="tech-title">Solid State Storage</div>
+                        <p>Uses electronic circuits with no moving parts</p>
+                        <ul style="padding-left: 20px; margin-top: 10px; color: var(--text-dim);">
+                            <li>Solid-State Drives (SSD)</li>
+                            <li>USB Flash Drives</li>
+                            <li>Memory Cards</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hard Disk Drives -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-compact-disc"></i> Hard Disk Drives (HDD)</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-cogs"></i> HDD Components</h3>
+                    <div class="section-content">
+                        <p>A hard disk drive contains several key components that work together to store and retrieve data:</p>
+                        
+                        <div class="components-grid">
+                            <div class="component-card">
+                                <div class="component-name">Platter</div>
+                                <div style="font-size: 0.9rem; color: var(--text-dim);">Circular magnetic disk where data is stored</div>
+                            </div>
+                            
+                            <div class="component-card">
+                                <div class="component-name">Spindle</div>
+                                <div style="font-size: 0.9rem; color: var(--text-dim);">Rotating shaft that holds and spins platters</div>
+                            </div>
+                            
+                            <div class="component-card">
+                                <div class="component-name">Read/Write Head</div>
+                                <div style="font-size: 0.9rem; color: var(--text-dim);">Magnetic sensor that reads/writes data</div>
+                            </div>
+                            
+                            <div class="component-card">
+                                <div class="component-name">Actuator Arm</div>
+                                <div style="font-size: 0.9rem; color: var(--text-dim);">Moves read/write head across platter</div>
+                            </div>
+                            
+                            <div class="component-card">
+                                <div class="component-name">Track</div>
+                                <div style="font-size: 0.9rem; color: var(--text-dim);">Circular path on a platter</div>
+                            </div>
+                            
+                            <div class="component-card">
+                                <div class="component-name">Sector</div>
+                                <div style="font-size: 0.9rem; color: var(--text-dim);">Smallest storage unit (512 bytes or 4KB)</div>
+                            </div>
+                            
+                            <div class="component-card">
+                                <div class="component-name">Cylinder</div>
+                                <div style="font-size: 0.9rem; color: var(--text-dim);">Tracks aligned on top of each other</div>
+                            </div>
+                            
+                            <div class="component-card">
+                                <div class="component-name">Cluster</div>
+                                <div style="font-size: 0.9rem; color: var(--text-dim);">Group of sectors (OS allocation unit)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-sync-alt"></i> How HDDs Work</h3>
+                    <div class="section-content">
+                        <div class="disk-visualization">
+                            <div class="disk-layer" style="height: 40px;">
+                                <div class="disk-label">Platters (Multiple Layers)</div>
+                            </div>
+                            <div class="disk-layer">
+                                <div class="disk-label">Tracks (Concentric Circles)</div>
+                            </div>
+                            <div class="disk-layer" style="height: 30px;">
+                                <div class="disk-label">Sectors (Track Segments)</div>
+                            </div>
+                        </div>
+                        
+                        <ul class="key-points">
+                            <li>Platters spin at high speeds (5400-7200 RPM)</li>
+                            <li>Read/write heads hover just microinches above platter surfaces</li>
+                            <li>Heads magnetize particles to write data</li>
+                            <li>Heads sense particle polarities to read data</li>
+                            <li>All heads move together as a unit</li>
+                            <li>Data accessed directly (random access)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Organization on Disk -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-layer-group"></i> Data Organization on Disk</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-project-diagram"></i> Disk Structure Hierarchy</h3>
+                    <div class="section-content">
+                        <p>Data is organized in a hierarchical structure on hard disks:</p>
+                        
+                        <div class="highlight" style="background: rgba(15, 240, 252, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 3px solid var(--neon-blue);">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                <i class="fas fa-arrow-down" style="color: var(--neon-blue);"></i>
+                                <span style="color: var(--neon-blue); font-weight: 600;">Hierarchy from Smallest to Largest:</span>
+                            </div>
+                            <div style="padding-left: 30px; color: var(--text-dim);">
+                                <div>Bit → Byte → Sector → Track → Cylinder → Platter → Disk</div>
+                            </div>
+                        </div>
+                        
+                        <ul class="key-points">
+                            <li><strong>Sector:</strong> Smallest addressable unit (usually 512 bytes)</li>
+                            <li><strong>Track:</strong> Concentric circles on platter surface</li>
+                            <li><strong>Cylinder:</strong> Set of tracks directly above/below each other</li>
+                            <li><strong>Cluster:</strong> Group of contiguous sectors (OS allocation unit)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-bullseye"></i> Cylinder Concept</h3>
+                    <div class="section-content">
+                        <p><strong>Cylinder:</strong> The set of tracks on a disk that are directly above/below each other</p>
+                        <div class="highlight" style="background: rgba(255, 0, 255, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 3px solid var(--neon-pink);">
+                            <p><strong>Key Advantage:</strong> All information on a cylinder can be accessed without moving the read/write arm (seeking)</p>
+                        </div>
+                        <p>This is why files are ideally stored in cylinders rather than spreading across different surfaces.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disk Capacity Calculation -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-calculator"></i> Disk Capacity Calculation</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-ruler"></i> Calculation Formulas</h3>
+                    <div class="section-content">
+                        <div class="calculation-box">
+                            <div class="calc-step">Number of cylinders = Number of tracks in a surface</div>
+                            <div class="calc-step">Track capacity = Sectors per track × Bytes per sector</div>
+                            <div class="calc-step">Cylinder capacity = Number of surfaces × Track capacity</div>
+                            <div class="calc-step">Drive capacity = Number of cylinders × Cylinder capacity</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-file-alt"></i> Example Calculation</h3>
+                    <div class="section-content">
+                        <p><strong>Given Disk Characteristics:</strong></p>
+                        <ul class="key-points">
+                            <li>Bytes per sector = 512</li>
+                            <li>Sectors per track = 63</li>
+                            <li>Tracks per cylinder = 16</li>
+                            <li>Number of cylinders = 4092</li>
+                        </ul>
+                        
+                        <div class="calculation-box">
+                            <p><strong>Step 1: Track capacity</strong></p>
+                            <div class="calc-step">63 × 512 = 32,256 bytes</div>
+                            
+                            <p style="margin-top: 15px;"><strong>Step 2: Cylinder capacity</strong></p>
+                            <div class="calc-step">16 × 32,256 = 516,096 bytes</div>
+                            
+                            <p style="margin-top: 15px;"><strong>Step 3: Drive capacity</strong></p>
+                            <div class="calc-step">4092 × 516,096 ≈ 2.11 GB</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-tasks"></i> File Size Calculation</h3>
+                    <div class="section-content">
+                        <p><strong>Scenario:</strong> File with 50,000 records, each 256 bytes</p>
+                        
+                        <div class="calculation-box">
+                            <p><strong>1. Total file size:</strong></p>
+                            <div class="calc-step">50,000 × 256 = 12,800,000 bytes</div>
+                            
+                            <p style="margin-top: 15px;"><strong>2. Sectors needed:</strong></p>
+                            <div class="calc-step">ceil(12,800,000 ÷ 512) = 25,000 sectors</div>
+                            
+                            <p style="margin-top: 15px;"><strong>3. Tracks needed:</strong></p>
+                            <div class="calc-step">ceil(25,000 ÷ 63) = 397 tracks</div>
+                            
+                            <p style="margin-top: 15px;"><strong>4. Cylinders needed:</strong></p>
+                            <div class="calc-step">25,000 ÷ (63 × 16) ≈ 24.8 cylinders</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disk Access Cost -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-clock"></i> Disk Access Cost</h2>
+                
+                <div class="access-cost">
+                    <div class="cost-item">
+                        <div class="cost-name">Seek Time</div>
+                        <div style="color: var(--text-dim);">Time to move arm to correct track</div>
+                        <div style="color: var(--neon-yellow); font-size: 1.2rem; margin-top: 10px;">~4-15 ms</div>
+                    </div>
+                    
+                    <div class="cost-item">
+                        <div class="cost-name">Rotational Delay</div>
+                        <div style="color: var(--text-dim);">Time for disk to rotate to correct sector</div>
+                        <div style="color: var(--neon-yellow); font-size: 1.2rem; margin-top: 10px;">~4-8 ms</div>
+                    </div>
+                    
+                    <div class="cost-item">
+                        <div class="cost-name">Transfer Time</div>
+                        <div style="color: var(--text-dim);">Time to move data to/from disk surface</div>
+                        <div style="color: var(--neon-yellow); font-size: 1.2rem; margin-top: 10px;">Depends on data size</div>
+                    </div>
+                </div>
+                
+                <div class="content-section">
+                    <div class="section-content">
+                        <div class="highlight" style="background: rgba(255, 235, 59, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 3px solid var(--neon-yellow);">
+                            <p><strong>Average Total Access Time = Average Seek Time + Average Rotational Delay + Transfer Time</strong></p>
+                        </div>
+                        
+                        <p><strong>Bottleneck:</strong> Moving the read/write arm (seeking) is the slowest part</p>
+                        <p><strong>Optimization:</strong> Store related data in same cylinder to minimize seeking</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Magnetic Tape Storage -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-tape"></i> Magnetic Tape Storage</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-archive"></i> Tape Characteristics</h3>
+                    <div class="section-content">
+                        <ul class="key-points">
+                            <li><strong>Access Type:</strong> Sequential access only</li>
+                            <li><strong>Speed:</strong> Much slower than disks</li>
+                            <li><strong>Cost:</strong> Considerably cheaper than disks</li>
+                            <li><strong>Capacity:</strong> High capacity (modern LTO-9: 18TB per tape)</li>
+                            <li><strong>Usage:</strong> Backup storage and long-term archiving</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-building"></i> Where Tape is Used Today</h3>
+                    <div class="section-content">
+                        <div class="tech-cards" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));">
+                            <div class="tech-card" style="border-top-color: var(--neon-green);">
+                                <div class="tech-title" style="color: var(--neon-green);">Backup Storage</div>
+                                <p>Companies and banks use tape for data backup to prevent data loss</p>
+                            </div>
+                            
+                            <div class="tech-card" style="border-top-color: var(--neon-purple);">
+                                <div class="tech-title" style="color: var(--neon-purple);">Long-term Archiving</div>
+                                <p>Hospital records, university archives, government data storage</p>
+                            </div>
+                            
+                            <div class="tech-card" style="border-top-color: var(--neon-blue);">
+                                <div class="tech-title" style="color: var(--neon-blue);">Disaster Recovery</div>
+                                <p>Off-site storage for data restoration after disasters</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-check-circle"></i> Why Tape is Still Used</h3>
+                    <div class="section-content">
+                        <ul class="key-points">
+                            <li><strong>Low cost per terabyte</strong> (cheaper than HDD/SSD)</li>
+                            <li><strong>High storage capacity</strong> (up to 18TB per tape)</li>
+                            <li><strong>Long lifespan</strong> (up to 30 years reliable storage)</li>
+                            <li><strong>High security</strong> (offline, immune to cyberattacks)</li>
+                            <li><strong>Energy efficient</strong> (power only when in use)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exam Focus Section -->
+            <div class="exam-focus">
+                <h2 class="exam-title"><i class="fas fa-star"></i> Exam Focus Points</h2>
+                <div class="exam-points">
+                    <div class="exam-point">
+                        <h4>HDD Components</h4>
+                        <p>Know all hard disk components and their functions</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Disk Organization</h4>
+                        <p>Sector, track, cylinder, cluster definitions and relationships</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Capacity Calculation</h4>
+                        <p>Be able to calculate disk capacity using given parameters</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Access Time Components</h4>
+                        <p>Seek time, rotational delay, transfer time formulas</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Cylinder Concept</h4>
+                        <p>Why storing data in cylinders is efficient</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Magnetic Tape</h4>
+                        <p>Characteristics and modern uses of tape storage</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Storage Technologies</h4>
+                        <p>Differences between magnetic, optical, solid-state storage</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>File Size Calculation</h4>
+                        <p>Calculate tracks/cylinders needed for given file size</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Takeaways -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-lightbulb"></i> Key Takeaways</h2>
+                <div class="content-section">
+                    <ul class="key-points">
+                        <li>Hard disks organize data in sectors, tracks, and cylinders for efficient access</li>
+                        <li>The cylinder concept allows accessing related data without arm movement</li>
+                        <li>Disk access time consists of seek time, rotational delay, and transfer time</li>
+                        <li>Capacity calculations use: cylinders × surfaces × sectors/track × bytes/sector</li>
+                        <li>Magnetic tape remains important for backups and archiving despite sequential access</li>
+                        <li>Understanding disk organization is crucial for designing efficient file systems</li>
+                        <li>Different storage technologies (magnetic, optical, solid-state) have different characteristics</li>
+                        <li>File placement strategies should minimize disk access time, especially seeking</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="index.html" class="action-btn btn-main">
+                    <i class="fas fa-home"></i> Back to Main Page
+                </a>
+                <a href="File organization the third lecture (3).pdf" class="action-btn btn-download" download>
+                    <i class="fas fa-download"></i> Download Chapter PDF
+                </a>
+            </div>
+        </main>
+
+        <footer>
+            <p>Chapter 3 Summary &copy; 2023 | Created by <span class="footer-highlight">Debuggers' Den Team</span></p>
+            <p style="margin-top: 10px;">This summary covers <span class="footer-highlight">all key points</span> from Chapter 3 for comprehensive exam preparation</p>
+        </footer>
+    </div>
+
+    <script>
+        // Add hover effects to content sections
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(5px)';
+            });
+            
+            section.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+
+        // Add animation to tech cards
+        document.querySelectorAll('.tech-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Add animation to component cards
+        document.querySelectorAll('.component-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Add click animation to action buttons
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+                
+                // If download button, show loading state
+                if (this.classList.contains('btn-download')) {
+                    const icon = this.querySelector('i');
+                    const originalClass = icon.className;
+                    icon.className = 'fas fa-spinner fa-spin';
+                    
+                    setTimeout(() => {
+                        icon.className = originalClass;
+                    }, 1000);
+                }
+            });
+        });
+
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate sections on load
+            const sections = document.querySelectorAll('.content-section, .glass-panel');
+            sections.forEach((section, index) => {
+                section.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+</body>
+</html>

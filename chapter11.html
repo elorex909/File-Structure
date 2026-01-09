@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 11: Hashing | File Organization Master</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --neon-blue: #0ff0fc;
+            --neon-pink: #ff00ff;
+            --neon-green: #00ff9d;
+            --neon-purple: #b967ff;
+            --neon-yellow: #ffeb3b;
+            --dark-bg: #0a0a0f;
+            --dark-surface: rgba(15, 15, 25, 0.85);
+            --text-light: #f0f0f0;
+            --text-dim: #b0b0c0;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(100, 0, 255, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 200, 0.05) 0%, transparent 20%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        header {
+            margin-bottom: 40px;
+            padding-top: 20px;
+            position: relative;
+        }
+
+        .back-nav {
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(15, 240, 252, 0.1);
+            color: var(--neon-blue);
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid rgba(15, 240, 252, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(15, 240, 252, 0.2);
+            box-shadow: 0 0 15px rgba(15, 240, 252, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .chapter-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .chapter-number {
+            font-size: 5rem;
+            font-weight: 800;
+            color: rgba(15, 240, 252, 0.2);
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .chapter-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(15, 240, 252, 0.3);
+        }
+
+        .chapter-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Glass Panel */
+        .glass-panel {
+            background: var(--dark-surface);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .glass-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba(15, 240, 252, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-title {
+            font-size: 1.8rem;
+            color: var(--neon-green);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid rgba(0, 255, 157, 0.2);
+            padding-bottom: 10px;
+        }
+
+        .panel-title i {
+            font-size: 1.5rem;
+        }
+
+        /* Content Sections */
+        .content-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--neon-blue);
+            transition: all 0.3s ease;
+        }
+
+        .content-section:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-left-color: var(--neon-pink);
+            transform: translateX(5px);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: var(--neon-blue);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--neon-pink);
+        }
+
+        .section-content {
+            color: var(--text-dim);
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .key-points {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 10px 0 10px 30px;
+            color: var(--text-dim);
+            position: relative;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .key-points li:last-child {
+            border-bottom: none;
+        }
+
+        .key-points li:before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            color: var(--neon-green);
+            font-size: 0.8rem;
+        }
+
+        .highlight {
+            background: rgba(15, 240, 252, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 3px solid var(--neon-blue);
+        }
+
+        .highlight-title {
+            color: var(--neon-blue);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        /* Hash Visualization */
+        .hash-visual {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        .hash-function {
+            background: rgba(185, 103, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 15px 0;
+            border: 1px solid rgba(185, 103, 255, 0.3);
+            color: var(--neon-purple);
+            width: 100%;
+        }
+
+        .hash-formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 5px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .comparison-table th {
+            background: rgba(15, 240, 252, 0.2);
+            color: var(--neon-blue);
+            padding: 15px;
+            text-align: left;
+            border-bottom: 2px solid rgba(15, 240, 252, 0.3);
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-dim);
+        }
+
+        .comparison-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* ASCII Table Styling */
+        .ascii-table {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .ascii-col {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .ascii-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Courier New', monospace;
+        }
+
+        .ascii-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Exam Focus Box */
+        .exam-focus {
+            background: rgba(255, 235, 59, 0.1);
+            border: 1px solid rgba(255, 235, 59, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exam-focus:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 235, 59, 0.05), transparent);
+        }
+
+        .exam-title {
+            color: var(--neon-yellow);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .exam-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .exam-point {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--neon-yellow);
+        }
+
+        /* Hash Table Example */
+        .hash-table-example {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            margin: 20px 0;
+        }
+
+        .hash-cell {
+            background: rgba(15, 240, 252, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            min-height: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 1px solid rgba(15, 240, 252, 0.2);
+        }
+
+        .hash-cell.empty {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-dim);
+        }
+
+        .hash-address {
+            font-size: 0.8rem;
+            color: var(--neon-blue);
+            margin-bottom: 5px;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .btn-main {
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            color: white;
+            border: none;
+        }
+
+        .btn-download {
+            background: rgba(255, 0, 255, 0.1);
+            color: var(--neon-pink);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-main:hover {
+            background: linear-gradient(to right, var(--neon-pink), var(--neon-blue));
+        }
+
+        .btn-download:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .footer-highlight {
+            color: var(--neon-green);
+            font-weight: 600;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .chapter-number {
+                font-size: 4rem;
+            }
+            
+            .chapter-title {
+                font-size: 2rem;
+            }
+            
+            .glass-panel {
+                padding: 20px;
+            }
+            
+            .exam-points {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .ascii-table {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .hash-table-example {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .chapter-number {
+                font-size: 3rem;
+            }
+            
+            .chapter-title {
+                font-size: 1.8rem;
+            }
+            
+            .panel-title {
+                font-size: 1.5rem;
+            }
+            
+            .ascii-table {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Back Navigation -->
+        <header>
+            <div class="back-nav">
+                <a href="index.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Main Page
+                </a>
+            </div>
+            
+            <div class="chapter-header">
+                <div class="chapter-number">11</div>
+                <h1 class="chapter-title">Hashing</h1>
+                <p class="chapter-subtitle">Advanced Searching Techniques, Hash Functions, Collision Resolution, and Performance Analysis</p>
+            </div>
+        </header>
+
+        <main>
+            <!-- Chapter Overview -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-graduation-cap"></i> Chapter Overview</h2>
+                <div class="content-section">
+                    <p class="section-content">
+                        This chapter explores hashing as an advanced searching technique for implementing indexes. It covers hash functions, 
+                        collision reduction strategies, various collision resolution techniques (progressive overflow, buckets, double hashing), 
+                        and practical implementation issues including deletions and performance analysis.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Hashing Introduction -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-search"></i> What is Hashing?</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-lightbulb"></i> Introduction</h3>
+                    <div class="section-content">
+                        <p>Hashing is a powerful searching technique primarily used for implementing indexes. The main motivation is to improve search time efficiency compared to other methods:</p>
+                        
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th>Method</th>
+                                    <th>Time Complexity</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Simple Indexes (Binary Search)</strong></td>
+                                    <td>O(log₂N)</td>
+                                    <td>Traditional indexing with logarithmic search time</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>B-Trees and B+ Trees</strong></td>
+                                    <td>O(log₄N)</td>
+                                    <td>Balanced tree structures for efficient searching</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Hashing</strong></td>
+                                    <td>O(1)</td>
+                                    <td>Constant time search using hash functions</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-random"></i> Hash Function Concept</h3>
+                    <div class="section-content">
+                        <p>A hash function transforms a key into an address within a predefined address space:</p>
+                        <div class="hash-visual">
+                            <div class="hash-function">
+                                <div>Key → Hash Function → Address</div>
+                                <div class="hash-formula">h: U → {0,1,...,N-1}</div>
+                                <p>Where U is the set of all possible keys, and N is the address space size</p>
+                            </div>
+                        </div>
+                        <ul class="key-points">
+                            <li><strong>Home Address:</strong> The address generated by the hash function for a specific key</li>
+                            <li><strong>Synonyms:</strong> Different keys that map to the same home address</li>
+                            <li><strong>Collision:</strong> When two different keys generate the same home address</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hash Functions -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-function"></i> Hash Functions</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-calculator"></i> Simple Hash Function Process</h3>
+                    <div class="section-content">
+                        <p>A typical hash function involves three steps:</p>
+                        <ol class="key-points" style="list-style-type: decimal; padding-left: 30px;">
+                            <li><strong>Transform key to number:</strong> Convert characters to ASCII codes</li>
+                            <li><strong>Fold and add:</strong> Chop off pieces and sum them, then take modulus with a prime number</li>
+                            <li><strong>Map to address space:</strong> Divide by address space size (preferably prime)</li>
+                        </ol>
+                        
+                        <div class="highlight">
+                            <div class="highlight-title">Example: Hashing "LOWELL"</div>
+                            <p>1. ASCII: L(76) O(79) W(87) E(69) L(76) L(76) → 767987697676</p>
+                            <p>2. Fold and mod: 767987697676 mod 19937 = 13,883</p>
+                            <p>3. Final address: 13,883 mod 101 = 46</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-chart-bar"></i> Distribution Patterns</h3>
+                    <div class="section-content">
+                        <p>Records can be distributed among addresses in three ways:</p>
+                        <div class="hash-table-example">
+                            <div class="hash-cell">
+                                <div class="hash-address">0</div>
+                                <div>A</div>
+                            </div>
+                            <div class="hash-cell">
+                                <div class="hash-address">1</div>
+                                <div>B</div>
+                            </div>
+                            <div class="hash-cell">
+                                <div class="hash-address">2</div>
+                                <div>C</div>
+                            </div>
+                            <div class="hash-cell empty">
+                                <div class="hash-address">3</div>
+                                <div>Empty</div>
+                            </div>
+                            <div class="hash-cell empty">
+                                <div class="hash-address">4</div>
+                                <div>Empty</div>
+                            </div>
+                        </div>
+                        <ul class="key-points">
+                            <li><strong>Uniform:</strong> Perfect distribution (extremely rare)</li>
+                            <li><strong>All Synonyms:</strong> All keys map to same address</li>
+                            <li><strong>Random:</strong> Acceptable distribution with few collisions</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-magic"></i> Advanced Hash Functions</h3>
+                    <div class="section-content">
+                        <div class="highlight">
+                            <div class="highlight-title">Square and Take Middle</div>
+                            <p>Key = 453 → 453² = 205209 → Extract middle = 52</p>
+                        </div>
+                        
+                        <div class="highlight">
+                            <div class="highlight-title">Radix Transformation</div>
+                            <p>Key = 453 (base 10) → Convert to base 11 = 382 → 382 mod 99 = 85</p>
+                        </div>
+                        
+                        <p><strong>Best Practices:</strong></p>
+                        <ul class="key-points">
+                            <li>Use prime numbers when dividing keys</li>
+                            <li>Examine keys for natural patterns (e.g., sequential years)</li>
+                            <li>Apply folding to preserve natural separation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Collision Resolution -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-exclamation-triangle"></i> Collision Resolution Techniques</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-forward"></i> Progressive Overflow (Linear Probing)</h3>
+                    <div class="section-content">
+                        <p>When a collision occurs, search sequentially for the next available slot:</p>
+                        
+                        <div class="highlight">
+                            <div class="highlight-title">Insertion Process</div>
+                            <ol style="padding-left: 20px;">
+                                <li>Go to home address h(k)</li>
+                                <li>If free → place record</li>
+                                <li>If occupied → try next position (wrap around at end)</li>
+                            </ol>
+                        </div>
+                        
+                        <div class="highlight">
+                            <div class="highlight-title">Example Table (Size = 23)</div>
+                            <div class="hash-table-example" style="grid-template-columns: repeat(8, 1fr);">
+                                <div class="hash-cell">
+                                    <div class="hash-address">0</div>
+                                    <div>DEAN</div>
+                                </div>
+                                <div class="hash-cell">
+                                    <div class="hash-address">1</div>
+                                    <div>EVANS</div>
+                                </div>
+                                <div class="hash-cell empty">
+                                    <div class="hash-address">2</div>
+                                    <div>Empty</div>
+                                </div>
+                                <div class="hash-cell empty">
+                                    <div class="hash-address">19</div>
+                                    <div>Empty</div>
+                                </div>
+                                <div class="hash-cell">
+                                    <div class="hash-address">20</div>
+                                    <div>COLE</div>
+                                </div>
+                                <div class="hash-cell">
+                                    <div class="hash-address">21</div>
+                                    <div>BATES</div>
+                                </div>
+                                <div class="hash-cell">
+                                    <div class="hash-address">22</div>
+                                    <div>ADAMS</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <p><strong>Search Length:</strong> Number of accesses required to retrieve a record</p>
+                        <p><strong>Average Search Length:</strong> (1+1+2+2+5)/5 = 2.2 accesses</p>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-box"></i> Hashing with Buckets</h3>
+                    <div class="section-content">
+                        <p>Store multiple records per hash address using buckets:</p>
+                        
+                        <div class="highlight">
+                            <div class="highlight-title">Bucket Structure</div>
+                            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; font-family: monospace;">
+                                <div>[2 | JONES | /////////// | ARNSWORTH]</div>
+                                <small>Counter indicates 2 records in bucket of size 3</small>
+                            </div>
+                        </div>
+                        
+                        <ul class="key-points">
+                            <li><strong>Bucket:</strong> Block of records corresponding to one hash address</li>
+                            <li><strong>Implementation:</strong> Each bucket contains counter for record tracking</li>
+                            <li><strong>Loading:</strong> Create file of empty buckets before storing records</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-exchange-alt"></i> Double Hashing</h3>
+                    <div class="section-content">
+                        <p>Use two hash functions when collisions occur:</p>
+                        
+                        <div class="highlight">
+                            <div class="highlight-title">Process</div>
+                            <ol style="padding-left: 20px;">
+                                <li>First function h₁(k) determines home address</li>
+                                <li>If occupied, apply second function h₂(k) = c</li>
+                                <li>Add c to home address for overflow addresses</li>
+                                <li>Continue until empty slot found</li>
+                            </ol>
+                        </div>
+                        
+                        <p><strong>Note:</strong> c should be relatively prime to table size N</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Implementation Issues -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-cogs"></i> Implementation Issues</h2>
+                
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-trash-alt"></i> Making Deletions</h3>
+                    <div class="section-content">
+                        <p>Deletions require special handling to avoid search problems:</p>
+                        
+                        <div class="highlight">
+                            <div class="highlight-title">Tombstone Method</div>
+                            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; font-family: monospace; margin: 10px 0;">
+                                <div>ADAMS</div>
+                                <div>JONES</div>
+                                <div style="color: var(--neon-pink);">########### (Tombstone)</div>
+                                <div>SMITH</div>
+                            </div>
+                            <p>Search continues past tombstones but stops at empty slots</p>
+                        </div>
+                        
+                        <ul class="key-points">
+                            <li><strong>Insert tombstone</strong> when next record is occupied</li>
+                            <li><strong>New records</strong> can replace tombstones</li>
+                            <li><strong>Too many tombstones</strong> increases search length</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title"><i class="fas fa-tachometer-alt"></i> Performance Considerations</h3>
+                    <div class="section-content">
+                        <p>Solutions for deteriorating performance:</p>
+                        <ul class="key-points">
+                            <li><strong>Move records backward</strong> after tombstone deletion</li>
+                            <li><strong>Complete reorganization</strong> through re-hashing</li>
+                            <li><strong>Alternative collision resolution</strong> techniques</li>
+                            <li><strong>Monitor average search length</strong> for degradation</li>
+                        </ul>
+                        
+                        <div class="highlight">
+                            <div class="highlight-title">Performance Degradation Example</div>
+                            <p>With many tombstones: Search for "SMITH" might incorrectly fail by stopping at a tombstone instead of continuing to find the actual record</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exam Focus Section -->
+            <div class="exam-focus">
+                <h2 class="exam-title"><i class="fas fa-star"></i> Exam Focus Points</h2>
+                <div class="exam-points">
+                    <div class="exam-point">
+                        <h4>Hash Function Design</h4>
+                        <p>Understand different hash function techniques and their properties</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Collision Resolution</h4>
+                        <p>Know progressive overflow, bucket hashing, and double hashing</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Time Complexity</h4>
+                        <p>O(1) search time vs O(log₂N) for binary search</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Deletion Handling</h4>
+                        <p>Tombstone method and its impact on search performance</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Synonyms & Collisions</h4>
+                        <p>Understand the difference and how to handle them</p>
+                    </div>
+                    <div class="exam-point">
+                        <h4>Performance Analysis</h4>
+                        <p>Calculate average search length and identify performance issues</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Takeaways -->
+            <div class="glass-panel">
+                <h2 class="panel-title"><i class="fas fa-lightbulb"></i> Key Takeaways</h2>
+                <div class="content-section">
+                    <ul class="key-points">
+                        <li>Hashing provides O(1) search time, making it the fastest searching technique for implementing indexes</li>
+                        <li>Hash functions transform keys into addresses, with collisions occurring when different keys map to same address</li>
+                        <li>Progressive overflow (linear probing) is simple but can lead to clustering and performance degradation</li>
+                        <li>Bucket hashing allows multiple records per address, improving space utilization</li>
+                        <li>Double hashing uses a second hash function to find overflow addresses, reducing clustering</li>
+                        <li>Deletions require special handling (tombstones) to maintain search correctness</li>
+                        <li>Performance monitoring is essential as too many tombstones or collisions degrade search efficiency</li>
+                        <li>Prime numbers in hash functions help achieve better random distributions</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="index.html" class="action-btn btn-main">
+                    <i class="fas fa-home"></i> Back to Main Page
+                </a>
+                <a href="File organization the Eleventh lecture (11).pdf" class="action-btn btn-download" download>
+                    <i class="fas fa-download"></i> Download Chapter PDF
+                </a>
+            </div>
+        </main>
+
+        <footer>
+            <p>Chapter 11 Summary &copy; 2023 | Created by <span class="footer-highlight">Debuggers' Den Team</span></p>
+            <p style="margin-top: 10px;">This summary covers <span class="footer-highlight">all key points</span> from Chapter 11 for comprehensive exam preparation</p>
+        </footer>
+    </div>
+
+    <script>
+        // Add hover effects to content sections
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(5px)';
+            });
+            
+            section.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+
+        // Add click animation to action buttons
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+                
+                // If download button, show loading state
+                if (this.classList.contains('btn-download')) {
+                    const icon = this.querySelector('i');
+                    const originalClass = icon.className;
+                    icon.className = 'fas fa-spinner fa-spin';
+                    
+                    setTimeout(() => {
+                        icon.className = originalClass;
+                    }, 1000);
+                }
+            });
+        });
+
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate sections on load
+            const sections = document.querySelectorAll('.content-section, .glass-panel');
+            sections.forEach((section, index) => {
+                section.style.animationDelay = `${index * 0.1}s`;
+            });
+            
+            // Animate hash table cells
+            const hashCells = document.querySelectorAll('.hash-cell');
+            hashCells.forEach((cell, index) => {
+                setTimeout(() => {
+                    cell.style.opacity = '0';
+                    cell.style.transform = 'translateY(10px)';
+                    setTimeout(() => {
+                        cell.style.transition = 'all 0.5s ease';
+                        cell.style.opacity = '1';
+                        cell.style.transform = 'translateY(0)';
+                    }, 100);
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>
